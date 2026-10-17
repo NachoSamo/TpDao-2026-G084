@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DER SQLite</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --box: #ffffff; --ink: #1d2433; --muted: #5d6779; --line: #8a93a6; --hl: #d9480f;
+    --catalogo: #2f6fde; --inventario: #2b9a66; --logistica: #d97706; --ventas: #0e9aa7;
+    --pk: #b7791f; --fk: #2f6fde; --uq: #8b5cf6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151c; --box: #1b2029; --ink: #e6e9ef; --muted: #9aa3b5; --line: #6b7488; --hl: #ff8a4c; --pk: #e0a43a; --fk: #6c9cf0; --uq: #a98bfa;
+    }
+  }
+  :root[data-theme="dark"] { --bg: #12151c; --box: #1b2029; --ink: #e6e9ef; --muted: #9aa3b5; --line: #6b7488; --hl: #ff8a4c; --pk: #e0a43a; --fk: #6c9cf0; --uq: #a98bfa; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+  header.top { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 16px; border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+  header.top h1 { font-size: 18px; margin: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  .zoom { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .scroller { overflow: auto; padding: 16px; }
+  .sizer { position: relative; }
+  .canvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; display: grid;
+    grid-template-columns: repeat(7, 270px); column-gap: 80px; row-gap: 70px; align-items: start; padding: 10px; }
+  svg.edges { position: absolute; inset: 0; overflow: visible; pointer-events: none; z-index: 0; }
+
+  .tbl { position: relative; z-index: 1; background: var(--box); border: 1.5px solid var(--ink); border-top: 6px solid var(--c);
+    border-radius: 4px; font-size: 12px; transition: opacity .15s; }
+  .tbl .name { padding: 6px 8px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 13px; font-family: ui-monospace, Consolas, monospace; }
+  .tbl ul { list-style: none; margin: 0; padding: 4px 8px; font-family: ui-monospace, Consolas, monospace; }
+  .tbl li { display: flex; gap: 6px; align-items: baseline; }
+  .tbl li .t { margin-left: auto; color: var(--muted); }
+  .tbl li .f { min-width: 34px; font-size: 12px; font-weight: 700; }
+  .f .PK { color: var(--pk); } .f .FK { color: var(--fk); } .f .UQ { color: var(--uq); }
+  .tbl .chk { white-space: pre-wrap; border-top: 1px dashed var(--line); padding: 4px 8px; color: var(--muted); font-size: 12px; font-family: ui-monospace, Consolas, monospace; }
+
+  g.edge { color: var(--line); transition: opacity .15s; }
+  g.edge path { fill: none; stroke: currentColor; stroke-width: 1.4; }
+  g.edge text { fill: var(--muted); font-size: 12px; font-style: italic; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .focus g.edge { opacity: .1; }
+  .focus g.edge.on { opacity: 1; color: var(--hl); }
+  .focus g.edge.on path { stroke-width: 2.2; }
+  .focusing .tbl:not(.on) { opacity: .35; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>DER — SQLite</h1>
+  <div class="legend">
+    <span><i style="background:var(--catalogo)"></i>Catálogo</span>
+    <span><i style="background:var(--inventario)"></i>Inventario</span>
+    <span><i style="background:var(--logistica)"></i>Logística</span>
+    <span><i style="background:var(--ventas)"></i>Ventas</span>
+    <span>Pata de gallo: ○&lt; 0..N · |&lt; 1..N · ○| 0..1 · || uno · montos en TEXT (Decimal) y fechas en TEXT ISO-8601 · pasá el mouse por una tabla</span>
+  </div>
+  <label class="zoom">Zoom <input id="zoom" type="range" min="40" max="120" value="80"></label>
+</header>
+<div class="scroller"><div class="sizer" id="sizer"><div class="canvas" id="canvas">
+  <svg class="edges" id="edges">
+    <defs>
+      <!-- el extremo derecho del marcador toca la tabla -->
+      <marker id="m-uno" viewBox="0 0 22 16" refX="22" refY="8" markerWidth="22" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M10 1 V15 M15 1 V15" stroke="context-stroke" stroke-width="1.6"/></marker>
+      <marker id="m-N" viewBox="0 0 22 16" refX="22" refY="8" markerWidth="22" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M22 1 L11 8 L22 15" fill="none" stroke="context-stroke" stroke-width="1.6"/>
+        <circle cx="5.5" cy="8" r="3.5" fill="var(--box)" stroke="context-stroke" stroke-width="1.4"/></marker>
+      <marker id="m-1N" viewBox="0 0 22 16" refX="22" refY="8" markerWidth="22" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M22 1 L11 8 L22 15 M6 1 V15" fill="none" stroke="context-stroke" stroke-width="1.6"/></marker>
+      <marker id="m-01" viewBox="0 0 22 16" refX="22" refY="8" markerWidth="22" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M15 1 V15" stroke="context-stroke" stroke-width="1.6"/>
+        <circle cx="6" cy="8" r="3.5" fill="var(--box)" stroke="context-stroke" stroke-width="1.4"/></marker>
+    </defs>
+  </svg>
+</div></div></div>
+
+<script>
+// [tabla, grupo, [columna, fila], columnas [nombre, tipo, flags], restricciones]
+const TABLAS = [
+  ['proveedor', 'catalogo', [1, 1], [['id', 'INTEGER', 'PK'], ['razon_social', 'TEXT'], ['cuit', 'TEXT', 'UQ'], ['telefono', 'TEXT']], ['RN-05: cuit único']],
+  ['producto_proveedor', 'catalogo', [2, 1], [['producto_id', 'INTEGER', 'PK FK'], ['proveedor_id', 'INTEGER', 'PK FK'], ['costo_unitario', 'TEXT'], ['principal', 'INTEGER']], ['principal IN (0,1)']],
+  ['producto', 'catalogo', [3, 1], [['id', 'INTEGER', 'PK'], ['codigo', 'TEXT', 'UQ'], ['nombre', 'TEXT'], ['categoria_id', 'INTEGER', 'FK'], ['precio_lista', 'TEXT'], ['costo_actual', 'TEXT'],
+    ['tipo_precio', 'TEXT'], ['porcentaje_descuento', 'TEXT'], ['vigente_hasta', 'TEXT'], ['cantidad_minima', 'INTEGER']],
+    ['RN-05: codigo único', "tipo_precio IN ('LISTA','PROMOCIONAL','VOLUMEN')", 'Strategy: params del precio en la misma fila']],
+  ['categoria', 'catalogo', [4, 1], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT', 'UQ']], []],
+
+  ['sucursal', 'inventario', [1, 2], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT'], ['direccion', 'TEXT'], ['tipo', 'TEXT']], ["tipo IN ('LOCAL','CD')"]],
+  ['stock', 'inventario', [3, 2], [['id', 'INTEGER', 'PK'], ['sucursal_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad_disponible', 'INTEGER'], ['cantidad_reservada', 'INTEGER'], ['stock_minimo', 'INTEGER']],
+    ['UNIQUE(sucursal_id, producto_id)', 'RN-04: cantidades >= 0']],
+  ['movimiento_stock', 'inventario', [4, 2], [['id', 'INTEGER', 'PK'], ['stock_id', 'INTEGER', 'FK'], ['fecha_hora', 'TEXT'], ['tipo', 'TEXT'], ['cantidad', 'INTEGER'], ['costo_unitario', 'TEXT'], ['referencia', 'TEXT']],
+    ['solo INSERT (historial)']],
+
+  ['orden_reposicion', 'logistica', [1, 3], [['id', 'INTEGER', 'PK'], ['fecha', 'TEXT'], ['estado', 'TEXT'], ['origen_id', 'INTEGER', 'FK'], ['destino_id', 'INTEGER', 'FK']],
+    ['RN-07: origen_id <> destino_id', '(CD/LOCAL se valida en Python)']],
+  ['detalle_orden_reposicion', 'logistica', [2, 3], [['id', 'INTEGER', 'PK'], ['orden_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad_solicitada', 'INTEGER'], ['cantidad_enviada', 'INTEGER']],
+    ['UNIQUE(orden_id, producto_id)', 'RN-08: enviada <= solicitada']],
+  ['remito', 'logistica', [1, 4], [['id', 'INTEGER', 'PK'], ['orden_id', 'INTEGER', 'FK'], ['numero', 'TEXT', 'UQ'], ['fecha_emision', 'TEXT'], ['estado', 'TEXT']], []],
+  ['bulto', 'logistica', [2, 4], [['id', 'INTEGER', 'PK'], ['remito_id', 'INTEGER', 'FK'], ['codigo_precinto', 'TEXT', 'UQ'], ['fecha_creacion', 'TEXT'], ['estado_actual', 'TEXT']],
+    ['estado_actual IN (', "  'PREPARADO','PRECINTADO','EN_TRANSITO',", "  'RECIBIDO','VERIFICADO','RECHAZADO')"]],
+  ['detalle_bulto', 'logistica', [3, 4], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK'], ['detalle_orden_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER']], ['cantidad > 0']],
+  ['cambio_estado_bulto', 'logistica', [1, 5], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK'], ['fecha_hora', 'TEXT'], ['estado_anterior', 'TEXT'], ['estado_nuevo', 'TEXT'], ['responsable', 'TEXT'], ['observacion', 'TEXT']],
+    ['RN-03: triggers bloquean UPDATE y DELETE']],
+  ['recepcion', 'logistica', [2, 5], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK UQ'], ['fecha_recepcion', 'TEXT'], ['precinto_integro', 'INTEGER'], ['responsable', 'TEXT'], ['observaciones', 'TEXT']],
+    ['precinto_integro IN (0,1)']],
+
+  ['detalle_venta', 'ventas', [4, 3], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER'], ['precio_unitario', 'TEXT'], ['costo_unitario', 'TEXT']], ['cantidad > 0']],
+  ['venta', 'ventas', [5, 3], [['id', 'INTEGER', 'PK'], ['sucursal_id', 'INTEGER', 'FK'], ['fecha', 'TEXT'], ['total', 'TEXT']], []],
+  ['cobro', 'ventas', [6, 3], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['medio_pago_id', 'INTEGER', 'FK'], ['monto', 'TEXT'], ['fecha', 'TEXT']], ['RN-10: SUM(monto) = venta.total (Python)']],
+  ['medio_pago', 'ventas', [7, 3], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT', 'UQ'], ['tipo', 'TEXT']], []],
+  ['detalle_devolucion', 'ventas', [4, 4], [['id', 'INTEGER', 'PK'], ['devolucion_id', 'INTEGER', 'FK'], ['detalle_venta_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER']], ['RN-06: <= cantidadDevolvible (Python)']],
+  ['devolucion', 'ventas', [5, 4], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['fecha', 'TEXT'], ['motivo', 'TEXT'], ['monto_reintegrado', 'TEXT']], []],
+  ['comprobante', 'ventas', [6, 4], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK UQ'], ['numero', 'TEXT', 'UQ'], ['tipo', 'TEXT'], ['fecha_emision', 'TEXT']], []],
+];
+
+// [tabla hija (tiene la FK), tabla padre, cardinalidad del lado hijo: N | 1N | 01, etiqueta]
+const RELACIONES = [
+  ['producto', 'categoria', 'N'],
+  ['producto_proveedor', 'producto', 'N'],
+  ['producto_proveedor', 'proveedor', 'N'],
+  ['stock', 'sucursal', 'N'],
+  ['stock', 'producto', 'N'],
+  ['movimiento_stock', 'stock', 'N'],
+  ['orden_reposicion', 'sucursal', 'N', 'origen_id'],
+  ['orden_reposicion', 'sucursal', 'N', 'destino_id'],
+  ['detalle_orden_reposicion', 'orden_reposicion', '1N'],
+  ['detalle_orden_reposicion', 'producto', 'N'],
+  ['remito', 'orden_reposicion', 'N'],
+  ['bulto', 'remito', '1N'],
+  ['detalle_bulto', 'bulto', '1N'],
+  ['detalle_bulto', 'detalle_orden_reposicion', 'N'],
+  ['cambio_estado_bulto', 'bulto', '1N'],
+  ['recepcion', 'bulto', '01'],
+  ['venta', 'sucursal', 'N'],
+  ['detalle_venta', 'venta', '1N'],
+  ['detalle_venta', 'producto', 'N'],
+  ['cobro', 'venta', 'N'],
+  ['cobro', 'medio_pago', 'N'],
+  ['comprobante', 'venta', '01'],
+  ['devolucion', 'venta', 'N'],
+  ['detalle_devolucion', 'devolucion', '1N'],
+  ['detalle_devolucion', 'detalle_venta', 'N'],
+];
+
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('edges');
+const NS = 'http://www.w3.org/2000/svg';
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+for (const [nombre, grupo, [col, fila], columnas, restricciones] of TABLAS) {
+  const el = document.createElement('div');
+  el.className = 'tbl';
+  el.id = 't-' + nombre;
+  el.style.cssText = `grid-column:${col};grid-row:${fila};--c:var(--${grupo})`;
+  el.innerHTML = `<div class="name">${nombre}</div><ul>`
+    + columnas.map(([n, tipo, flags = '']) =>
+      `<li><span class="f">${flags.split(' ').map(f => `<span class="${f}">${f}</span>`).join(' ')}</span>${n}<span class="t">${tipo}</span></li>`).join('')
+    + '</ul>' + (restricciones.length ? `<div class="chk">${restricciones.map(esc).join('<br>')}</div>` : '');
+  canvas.appendChild(el);
+}
+
+const caja = n => { const e = document.getElementById('t-' + n); return { x: e.offsetLeft, y: e.offsetTop, w: e.offsetWidth, h: e.offsetHeight }; };
+// punto donde la recta centro(r) → (tx,ty) corta el borde de r
+function borde(r, cx, cy, tx, ty) {
+  const dx = tx - cx, dy = ty - cy;
+  const t = Math.min(dx ? (r.w / 2) / Math.abs(dx) : Infinity, dy ? (r.h / 2) / Math.abs(dy) : Infinity);
+  return [cx + dx * t, cy + dy * t];
+}
+
+function dibujar() {
+  svg.querySelectorAll('g.edge').forEach(g => g.remove());
+  svg.setAttribute('width', canvas.scrollWidth); svg.setAttribute('height', canvas.scrollHeight);
+  const pares = {};
+  RELACIONES.forEach(r => { const k = [r[0], r[1]].sort().join(); (pares[k] ||= []).push(r); });
+
+  for (const r of RELACIONES) {
+    const [a, b, card, etiqueta = ''] = r;
+    const A = caja(a), B = caja(b);
+    let ax = A.x + A.w / 2, ay = A.y + A.h / 2, bx = B.x + B.w / 2, by = B.y + B.h / 2;
+    const L = Math.hypot(bx - ax, by - ay), px = -(by - ay) / L, py = (bx - ax) / L;
+    // FKs paralelas entre el mismo par (origen_id / destino_id)
+    const grupo = pares[[a, b].sort().join()], i = grupo.indexOf(r), off = (i - (grupo.length - 1) / 2) * 30;
+    ax += px * off; ay += py * off; bx += px * off; by += py * off;
+    const [x1, y1] = borde(A, ax, ay, bx, by), [x2, y2] = borde(B, bx, by, ax, ay);
+
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'edge');
+    g.dataset.a = a; g.dataset.b = b;
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', `M${x1},${y1} L${x2},${y2}`);
+    p.setAttribute('marker-start', `url(#m-${card})`);
+    p.setAttribute('marker-end', 'url(#m-uno)');
+    g.appendChild(p);
+    if (etiqueta) {
+      const t = document.createElementNS(NS, 'text'), k = grupo.length > 1 ? 0.3 + 0.4 * i / (grupo.length - 1) : 0.5;
+      t.setAttribute('x', x1 + (x2 - x1) * k); t.setAttribute('y', y1 + (y2 - y1) * k);
+      t.setAttribute('text-anchor', 'middle'); t.setAttribute('dominant-baseline', 'middle');
+      t.textContent = etiqueta; g.appendChild(t);
+    }
+    svg.appendChild(g);
+  }
+}
+
+// resaltar relaciones de la tabla bajo el mouse
+canvas.addEventListener('mouseover', e => {
+  const c = e.target.closest('.tbl'); if (!c) return;
+  const n = c.id.slice(2), vecinos = new Set([n]);
+  svg.querySelectorAll('g.edge').forEach(g => {
+    const on = g.dataset.a === n || g.dataset.b === n;
+    g.classList.toggle('on', on);
+    if (on) { vecinos.add(g.dataset.a); vecinos.add(g.dataset.b); }
+  });
+  canvas.querySelectorAll('.tbl').forEach(x => x.classList.toggle('on', vecinos.has(x.id.slice(2))));
+  svg.classList.add('focus'); canvas.classList.add('focusing');
+});
+canvas.addEventListener('mouseleave', () => { svg.classList.remove('focus'); canvas.classList.remove('focusing'); });
+
+const zoom = document.getElementById('zoom'), sizer = document.getElementById('sizer');
+function escalar() {
+  const s = zoom.value / 100;
+  canvas.style.transform = `scale(${s})`;
+  sizer.style.width = canvas.scrollWidth * s + 'px'; sizer.style.height = canvas.scrollHeight * s + 'px';
+}
+zoom.addEventListener('input', escalar);
+dibujar(); escalar();
+</script>
+</body>
+</html>

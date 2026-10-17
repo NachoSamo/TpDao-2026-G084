@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagrama de Clases</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --box: #ffffff; --ink: #1d2433; --muted: #5d6779; --line: #8a93a6; --hl: #d9480f;
+    --catalogo: #2f6fde; --inventario: #2b9a66; --logistica: #d97706; --estado: #8b5cf6; --ventas: #0e9aa7; --reportes: #6b7280;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151c; --box: #1b2029; --ink: #e6e9ef; --muted: #9aa3b5; --line: #6b7488; --hl: #ff8a4c;
+    }
+  }
+  :root[data-theme="dark"] { --bg: #12151c; --box: #1b2029; --ink: #e6e9ef; --muted: #9aa3b5; --line: #6b7488; --hl: #ff8a4c; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+  header.top { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 16px; border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+  header.top h1 { font-size: 18px; margin: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  .zoom { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .scroller { overflow: auto; padding: 16px; }
+  .sizer { position: relative; }
+  .canvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; display: grid;
+    grid-template-columns: repeat(7, 250px); column-gap: 80px; row-gap: 70px; align-items: start; padding: 10px; }
+  svg.edges { position: absolute; inset: 0; overflow: visible; pointer-events: none; z-index: 0; }
+
+  .cls { position: relative; z-index: 1; background: var(--box); border: 1.5px solid var(--ink); border-top: 6px solid var(--c);
+    border-radius: 4px; font-size: 12px; transition: opacity .15s; }
+  .cls .name { text-align: center; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  .cls .name b { display: block; font-size: 13px; }
+  .cls .name small { color: var(--muted); font-style: italic; }
+  .cls ul { list-style: none; margin: 0; padding: 4px 8px; min-height: 10px; font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; }
+  .cls ul + ul { border-top: 1px solid var(--line); }
+  .cls.abstract .name b { font-style: italic; }
+
+  g.edge { color: var(--line); transition: opacity .15s; }
+  g.edge path { fill: none; stroke: currentColor; stroke-width: 1.4; }
+  g.edge.dashed path { stroke-dasharray: 6 4; }
+  g.edge text { fill: var(--ink); font-size: 11px; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  g.edge text.lbl { font-style: italic; fill: var(--muted); }
+  .focus g.edge { opacity: .1; }
+  .focus g.edge.on { opacity: 1; color: var(--hl); }
+  .focus g.edge.on path { stroke-width: 2.2; }
+  .focusing .cls:not(.on) { opacity: .35; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Diagrama de Clases — TP DAO Tema 3</h1>
+  <div class="legend">
+    <span><i style="background:var(--catalogo)"></i>Catálogo (Strategy)</span>
+    <span><i style="background:var(--inventario)"></i>Inventario (Observer)</span>
+    <span><i style="background:var(--logistica)"></i>Logística</span>
+    <span><i style="background:var(--estado)"></i>Estados del bulto (State)</span>
+    <span><i style="background:var(--ventas)"></i>Ventas</span>
+    <span><i style="background:var(--reportes)"></i>Reportes</span>
+    <span>◆ composición · △ herencia/implementación · → asociación · ⇢ dependencia · pasá el mouse por una clase para ver sus relaciones</span>
+  </div>
+  <label class="zoom">Zoom <input id="zoom" type="range" min="40" max="120" value="80"></label>
+</header>
+<div class="scroller"><div class="sizer" id="sizer"><div class="canvas" id="canvas">
+  <svg class="edges" id="edges">
+    <defs>
+      <marker id="m-arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M1 1 L11 6 L1 11" fill="none" stroke="context-stroke" stroke-width="1.4"/></marker>
+      <marker id="m-tri" viewBox="0 0 16 16" refX="15" refY="8" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M1 1 L15 8 L1 15 Z" fill="var(--box)" stroke="context-stroke" stroke-width="1.4"/></marker>
+      <marker id="m-diamond" viewBox="0 0 20 12" refX="19" refY="6" markerWidth="20" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+        <path d="M1 6 L10 1 L19 6 L10 11 Z" fill="context-stroke" stroke="context-stroke"/></marker>
+    </defs>
+  </svg>
+</div></div></div>
+
+<script>
+// [nombre, grupo, [columna, fila], estereotipo, atributos, métodos]
+const CLASES = [
+  ['Proveedor', 'catalogo', [1, 1], '', ['- Long id', '- String razonSocial', '- String cuit', '- String telefono'], []],
+  ['ProductoProveedor', 'catalogo', [2, 1], '', ['- BigDecimal costoUnitario', '- boolean principal'], []],
+  ['Producto', 'catalogo', [3, 1], '', ['- Long id', '- String codigo', '- String nombre', '- BigDecimal precioLista', '- BigDecimal costoActual'], ['+ calcularPrecio(cantidad: int) : BigDecimal']],
+  ['EstrategiaPrecio', 'catalogo', [4, 1], 'interface', [], ['+ calcular(precio: BigDecimal, cantidad: int) : BigDecimal']],
+  ['Categoria', 'catalogo', [2, 2], '', ['- Long id', '- String nombre'], []],
+  ['PrecioLista', 'catalogo', [4, 2], '', [], []],
+  ['PrecioPromocional', 'catalogo', [5, 2], '', ['- BigDecimal porcentajeDescuento', '- LocalDate vigenteHasta'], []],
+  ['PrecioPorVolumen', 'catalogo', [6, 2], '', ['- int cantidadMinima', '- BigDecimal porcentajeDescuento'], []],
+
+  ['Sucursal', 'inventario', [1, 3], '', ['- Long id', '- String nombre', '- String direccion', '- TipoSucursal tipo'], ['+ esCentroDistribucion() : boolean']],
+  ['Stock', 'inventario', [3, 3], '', ['- Long id', '- int cantidadDisponible', '- int cantidadReservada', '- int stockMinimo'],
+    ['+ disponibleParaVenta() : int', '+ ingresarVerificado(cantidad: int)', '+ egresar(cantidad: int)', '+ estaBajoMinimo() : boolean', '+ agregarObservador(o: ObservadorStock)']],
+  ['MovimientoStock', 'inventario', [4, 3], '', ['- LocalDateTime fechaHora', '- TipoMovimiento tipo', '- int cantidad', '- BigDecimal costoUnitario', '- String referencia'], []],
+  ['ObservadorStock', 'inventario', [3, 4], 'interface', [], ['+ stockBajoMinimo(stock: Stock)']],
+  ['GeneradorReposicionAutomatica', 'inventario', [2, 4], '', [], ['+ stockBajoMinimo(stock: Stock)']],
+
+  ['OrdenReposicion', 'logistica', [1, 4], '', ['- Long id', '- LocalDate fecha', '- EstadoOrden estado'], ['+ consolidar(necesidades: List<DetalleOrdenReposicion>)', '+ confirmar()', '+ cerrar()']],
+  ['Remito', 'logistica', [1, 5], '', ['- Long id', '- String numero', '- LocalDateTime fechaEmision', '- EstadoRemito estado'], ['+ despachar()', '+ actualizarEstadoSegunBultos()']],
+  ['DetalleOrdenReposicion', 'logistica', [2, 5], '', ['- int cantidadSolicitada', '- int cantidadEnviada'], []],
+  ['CambioEstadoBulto', 'logistica', [1, 6], '', ['- LocalDateTime fechaHora', '- String estadoAnterior', '- String estadoNuevo', '- String responsable', '- String observacion'], []],
+  ['BultoContenedor', 'logistica', [2, 6], '', ['- Long id', '- String codigoPrecinto', '- LocalDateTime fechaCreacion', '- EstadoBulto estadoActual'],
+    ['+ precintar()', '+ despachar()', '+ recibir()', '+ verificar()', '+ rechazar(motivo: String)']],
+  ['DetalleBulto', 'logistica', [3, 6], '', ['- int cantidad'], []],
+  ['Recepcion', 'logistica', [1, 7], '', ['- Long id', '- LocalDateTime fechaRecepcion', '- boolean precintoIntegro', '- String responsable', '- String observaciones'], ['+ registrar()']],
+
+  ['EstadoBulto', 'estado', [2, 7], 'abstract', [], ['+ nombre() : String', '+ precintar(b: BultoContenedor)', '+ despachar(b: BultoContenedor)', '+ recibir(b: BultoContenedor)', '+ verificar(b: BultoContenedor)', '+ rechazar(b: BultoContenedor, motivo: String)']],
+  ['EstadoPreparado', 'estado', [1, 8], '', [], ['+ precintar(b: BultoContenedor)']],
+  ['EstadoPrecintado', 'estado', [2, 8], '', [], ['+ despachar(b: BultoContenedor)']],
+  ['EstadoEnTransito', 'estado', [3, 8], '', [], ['+ recibir(b: BultoContenedor)']],
+  ['EstadoRecibido', 'estado', [4, 8], '', [], ['+ verificar(b: BultoContenedor)', '+ rechazar(b: BultoContenedor, motivo: String)']],
+  ['EstadoVerificado', 'estado', [5, 8], '', [], []],
+  ['EstadoRechazado', 'estado', [6, 8], '', [], []],
+
+  ['DetalleDevolucion', 'ventas', [4, 4], '', ['- int cantidad'], []],
+  ['Devolucion', 'ventas', [5, 4], '', ['- Long id', '- LocalDateTime fecha', '- String motivo', '- BigDecimal montoReintegrado'], ['+ validar()', '+ calcularReintegro() : BigDecimal']],
+  ['Venta', 'ventas', [6, 4], '', ['- Long id', '- LocalDateTime fecha', '- BigDecimal total'],
+    ['+ agregarDetalle(producto: Producto, cantidad: int)', '+ calcularTotal() : BigDecimal', '+ registrarCobro(medio: MedioPago, monto: BigDecimal)', '+ emitirComprobante() : Comprobante']],
+  ['Comprobante', 'ventas', [7, 4], '', ['- String numero', '- String tipo', '- LocalDateTime fechaEmision'], []],
+  ['DetalleVenta', 'ventas', [5, 5], '', ['- int cantidad', '- BigDecimal precioUnitario', '- BigDecimal costoUnitario'], ['+ subtotal() : BigDecimal', '+ cantidadDevolvible() : int']],
+  ['Cobro', 'ventas', [6, 5], '', ['- BigDecimal monto', '- LocalDateTime fecha'], []],
+  ['MedioPago', 'ventas', [7, 5], '', ['- Long id', '- String nombre', '- TipoMedioPago tipo'], []],
+
+  ['Reporte', 'reportes', [6, 6], 'interface', [], ['+ generar(filtro: FiltroReporte) : ResultadoReporte']],
+  ['ReporteVentasPorPeriodo', 'reportes', [4, 7], '', [], []],
+  ['ReporteMasVendidosYMargen', 'reportes', [5, 7], '', [], []],
+  ['ReporteBultosRechazados', 'reportes', [6, 7], '', [], []],
+  ['ReporteTiempoTransito', 'reportes', [7, 7], '', [], []],
+];
+
+// [desde, hacia, tipo, etiqueta, cardinalidad desde, cardinalidad hacia]
+// tipo: asoc (→ en "hacia"), comp (◆ en "desde"), dep (⇢), impl (△ punteado en "desde"), ext (△ en "desde")
+const RELACIONES = [
+  ['Categoria', 'Producto', 'asoc', 'clasifica', '1', '*'],
+  ['Producto', 'ProductoProveedor', 'asoc', '', '1', '*'],
+  ['Proveedor', 'ProductoProveedor', 'asoc', '', '1', '*'],
+  ['Producto', 'EstrategiaPrecio', 'asoc', 'usa', '', ''],
+  ['EstrategiaPrecio', 'PrecioLista', 'impl'],
+  ['EstrategiaPrecio', 'PrecioPromocional', 'impl'],
+  ['EstrategiaPrecio', 'PrecioPorVolumen', 'impl'],
+  ['Sucursal', 'Stock', 'asoc', 'almacena', '1', '*'],
+  ['Producto', 'Stock', 'asoc', '', '1', '*'],
+  ['Stock', 'MovimientoStock', 'comp', '', '1', '*'],
+  ['Stock', 'ObservadorStock', 'asoc', 'notifica', '1', '*'],
+  ['ObservadorStock', 'GeneradorReposicionAutomatica', 'impl'],
+  ['GeneradorReposicionAutomatica', 'OrdenReposicion', 'dep', 'genera'],
+  ['OrdenReposicion', 'Sucursal', 'asoc', 'origen CD', '*', '1'],
+  ['OrdenReposicion', 'Sucursal', 'asoc', 'destino local', '*', '1'],
+  ['OrdenReposicion', 'DetalleOrdenReposicion', 'comp', '', '1', '1..*'],
+  ['DetalleOrdenReposicion', 'Producto', 'asoc', '', '*', '1'],
+  ['OrdenReposicion', 'Remito', 'asoc', '', '1', '*'],
+  ['Remito', 'BultoContenedor', 'asoc', 'agrupa', '1', '1..*'],
+  ['BultoContenedor', 'DetalleBulto', 'comp', '', '1', '1..*'],
+  ['DetalleBulto', 'DetalleOrdenReposicion', 'asoc', 'cubre', '*', '1'],
+  ['BultoContenedor', 'CambioEstadoBulto', 'comp', 'historial', '1', '1..*'],
+  ['BultoContenedor', 'Recepcion', 'asoc', '', '1', '0..1'],
+  ['BultoContenedor', 'EstadoBulto', 'asoc', 'estadoActual', '', ''],
+  ['EstadoBulto', 'EstadoPreparado', 'ext'],
+  ['EstadoBulto', 'EstadoPrecintado', 'ext'],
+  ['EstadoBulto', 'EstadoEnTransito', 'ext'],
+  ['EstadoBulto', 'EstadoRecibido', 'ext'],
+  ['EstadoBulto', 'EstadoVerificado', 'ext'],
+  ['EstadoBulto', 'EstadoRechazado', 'ext'],
+  ['Sucursal', 'Venta', 'asoc', 'ejecuta', '1', '*'],
+  ['Venta', 'DetalleVenta', 'comp', '', '1', '1..*'],
+  ['DetalleVenta', 'Producto', 'asoc', '', '*', '1'],
+  ['Venta', 'Cobro', 'comp', '', '1', '*'],
+  ['Cobro', 'MedioPago', 'asoc', '', '*', '1'],
+  ['Venta', 'Comprobante', 'comp', '', '1', '0..1'],
+  ['Venta', 'Devolucion', 'asoc', '', '1', '*'],
+  ['Devolucion', 'DetalleDevolucion', 'comp', '', '1', '1..*'],
+  ['DetalleDevolucion', 'DetalleVenta', 'asoc', '', '*', '1'],
+  ['Reporte', 'ReporteVentasPorPeriodo', 'impl'],
+  ['Reporte', 'ReporteMasVendidosYMargen', 'impl'],
+  ['Reporte', 'ReporteBultosRechazados', 'impl'],
+  ['Reporte', 'ReporteTiempoTransito', 'impl'],
+];
+
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('edges');
+const NS = 'http://www.w3.org/2000/svg';
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+for (const [nombre, grupo, [col, fila], estereotipo, attrs, metodos] of CLASES) {
+  const el = document.createElement('div');
+  el.className = 'cls' + (estereotipo === 'abstract' ? ' abstract' : '');
+  el.id = 'c-' + nombre;
+  el.style.cssText = `grid-column:${col};grid-row:${fila};--c:var(--${grupo})`;
+  el.innerHTML = `<div class="name">${estereotipo ? `<small>«${estereotipo}»</small>` : ''}<b>${nombre}</b></div>`
+    + `<ul>${attrs.map(a => `<li>${esc(a)}</li>`).join('')}</ul><ul>${metodos.map(m => `<li>${esc(m)}</li>`).join('')}</ul>`;
+  canvas.appendChild(el);
+}
+
+const caja = n => { const e = document.getElementById('c-' + n); return { x: e.offsetLeft, y: e.offsetTop, w: e.offsetWidth, h: e.offsetHeight }; };
+// punto donde la recta centro(r) → (tx,ty) corta el borde de r
+function borde(r, cx, cy, tx, ty) {
+  const dx = tx - cx, dy = ty - cy;
+  const t = Math.min(dx ? (r.w / 2) / Math.abs(dx) : Infinity, dy ? (r.h / 2) / Math.abs(dy) : Infinity);
+  return [cx + dx * t, cy + dy * t];
+}
+function texto(g, x, y, s, cls) {
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('text-anchor', 'middle'); t.setAttribute('dominant-baseline', 'middle');
+  if (cls) t.setAttribute('class', cls);
+  t.textContent = s; g.appendChild(t);
+}
+
+function dibujar() {
+  svg.querySelectorAll('g.edge').forEach(g => g.remove());
+  svg.setAttribute('width', canvas.scrollWidth); svg.setAttribute('height', canvas.scrollHeight);
+  const pares = {};
+  RELACIONES.forEach(r => { const k = [r[0], r[1]].sort().join(); (pares[k] ||= []).push(r); });
+
+  for (const r of RELACIONES) {
+    const [a, b, tipo, etiqueta = '', cardA = '', cardB = ''] = r;
+    const A = caja(a), B = caja(b);
+    let ax = A.x + A.w / 2, ay = A.y + A.h / 2, bx = B.x + B.w / 2, by = B.y + B.h / 2;
+    const L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L, px = -uy, py = ux;
+    // relaciones paralelas entre el mismo par (ej. origen/destino de OrdenReposicion)
+    const grupo = pares[[a, b].sort().join()], off = (grupo.indexOf(r) - (grupo.length - 1) / 2) * 30;
+    ax += px * off; ay += py * off; bx += px * off; by += py * off;
+    const [x1, y1] = borde(A, ax, ay, bx, by), [x2, y2] = borde(B, bx, by, ax, ay);
+
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'edge' + (tipo === 'impl' || tipo === 'dep' ? ' dashed' : ''));
+    g.dataset.a = a; g.dataset.b = b;
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', `M${x1},${y1} L${x2},${y2}`);
+    if (tipo === 'asoc' || tipo === 'dep') p.setAttribute('marker-end', 'url(#m-arrow)');
+    if (tipo === 'comp') p.setAttribute('marker-start', 'url(#m-diamond)');
+    if (tipo === 'impl' || tipo === 'ext') p.setAttribute('marker-start', 'url(#m-tri)');
+    g.appendChild(p);
+    const t = grupo.length > 1 ? 0.3 + 0.4 * grupo.indexOf(r) / (grupo.length - 1) : 0.5; // separa etiquetas paralelas
+    if (etiqueta) texto(g, x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, etiqueta, 'lbl');
+    if (cardA) texto(g, x1 + ux * 26 + px * 12, y1 + uy * 26 + py * 12, cardA);
+    if (cardB) texto(g, x2 - ux * 26 + px * 12, y2 - uy * 26 + py * 12, cardB);
+    svg.appendChild(g);
+  }
+}
+
+// resaltar relaciones de la clase bajo el mouse
+canvas.addEventListener('mouseover', e => {
+  const c = e.target.closest('.cls'); if (!c) return;
+  const n = c.id.slice(2), vecinos = new Set([n]);
+  svg.querySelectorAll('g.edge').forEach(g => {
+    const on = g.dataset.a === n || g.dataset.b === n;
+    g.classList.toggle('on', on);
+    if (on) { vecinos.add(g.dataset.a); vecinos.add(g.dataset.b); }
+  });
+  canvas.querySelectorAll('.cls').forEach(x => x.classList.toggle('on', vecinos.has(x.id.slice(2))));
+  svg.classList.add('focus'); canvas.classList.add('focusing');
+});
+canvas.addEventListener('mouseleave', () => { svg.classList.remove('focus'); canvas.classList.remove('focusing'); });
+
+const zoom = document.getElementById('zoom'), sizer = document.getElementById('sizer');
+function escalar() {
+  const s = zoom.value / 100;
+  canvas.style.transform = `scale(${s})`;
+  sizer.style.width = canvas.scrollWidth * s + 'px'; sizer.style.height = canvas.scrollHeight * s + 'px';
+}
+zoom.addEventListener('input', escalar);
+dibujar(); escalar();
+</script>
+</body>
+</html>
