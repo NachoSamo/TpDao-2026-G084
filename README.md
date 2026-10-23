@@ -1,6 +1,6 @@
 # Andén · TP DAO 2026 · G084
 
-Sistema de Centro de Distribución a Locales. Python 3.12+, SQLite con DAO propios, Tkinter/ttk y unittest. Sin paquetes externos ni secretos. State controla el ciclo del bulto; Observer genera reposiciones al caer bajo el mínimo.
+Sistema de Centro de Distribución a Locales. Python 3.12+, SQLite con DAO propio, interfaz web local y unittest. Sin paquetes externos ni secretos. State controla el ciclo del bulto; Observer genera reposiciones al caer bajo el mínimo.
 
 ## Ejecutar la web
 
@@ -52,6 +52,7 @@ Importes con punto decimal, hasta dos decimales; cantidades enteras positivas. E
 
 ## Documentación del grupo
 
+- [Entender el código: orden de lectura, archivos y recorridos completos](docs/entender-el-codigo.md).
 - [Cómo probar, decisiones y registros](docs/pruebas-y-decisiones.md).
 - [Patrones, diagramas y código Mermaid](docs/patrones-de-diseno.md).
 - [Defensa: consigna, flujo, patrones y persistencia](docs/defensa.md).

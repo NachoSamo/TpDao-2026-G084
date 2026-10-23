@@ -1,5 +1,11 @@
 # Memoria de sesión — TP DAO G084
 
+## 2026-10-23 — Codex — Guía para entender el código
+
+- Se agregó docs/entender-el-codigo.md con orden de lectura, mapa de archivos, arranque, verificación/venta completas, transacciones, DAO, frontend, reportes, sintaxis Python, ejercicios y preguntas de comprensión.
+- Explica explícitamente que Producto/Venta/Remito son registros/diccionarios y no clases Python independientes; el modelo conceptual no se tradujo uno a uno. DAO es genérico; State y Observer sí son objetos con comportamiento. Sin cambios a lógica de ejecución.
+- README y mensaje para grupo enlazan la guía. La rama sigue siendo rama-juani; el push continúa pendiente del permiso de escritura ya informado.
+
 ## 2026-10-23 — Codex — Web Andén, documentación y rama de Juan
 
 - Interfaz principal reemplazada por web local con tablero de bultos elegido por el usuario. API Python stdlib, servicios/State/Observer y SQLite conservados. HTML/CSS/JS y Rubik local OFL, sin dependencias de ejecución externas.

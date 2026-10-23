@@ -4,6 +4,7 @@ Quedó preparada en la rama `rama-juani` una implementación funcional del TP co
 
 Quedaron estos docs para revisar:
 
+- `docs/entender-el-codigo.md`: por dónde empezar a leer, qué hace cada archivo y recorridos de verificación/venta desde la pantalla hasta SQLite, con ejemplos y preguntas para estudiar.
 - `docs/pruebas-y-decisiones.md`: cómo levantarlo y probarlo paso a paso, por qué se tomaron las decisiones y qué registros guarda cada operación.
 - `docs/patrones-de-diseno.md`: explicación de State, Observer y DAO, dónde están en el código, diagramas y Mermaid editable. También están los `.mmd` en `docs/diagramas/`.
 - `docs/defensa.md`: qué pide el TP, cómo lo cubre la app y un recorrido para explicar el flujo, los patrones y la persistencia.
