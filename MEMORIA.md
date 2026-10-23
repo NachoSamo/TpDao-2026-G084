@@ -8,7 +8,8 @@
 - Corregidos listener de formularios con control name=id, nombres accesibles, favicon y cuatro ajustes visuales. Registro de alcance/límites en docs/registro-pruebas.md.
 - Usuario pidió subir a una rama “rama juani”: nombre Git válido rama-juani. Docs nuevos pruebas-y-decisiones.md, patrones-de-diseno.md con Mermaid y .mmd, persistencia.md, defensa.md ampliado y mensaje-grupo.md. Sin merge ni deploy.
 - Persistencia decidida: esquema y seeds versionados; cada integrante genera su .db local, excluido junto con journals/WAL/SHM. No hay base compartida ni migraciones de tablas existentes.
-- Pendiente: revisión del grupo y cátedra de remitos mixtos, alcance compras y formato de entrega; revisar límites de DAO genérico, idempotencia de ventas, cancelaciones, login y despliegue.
+- Push bloqueado: git push -u origin rama-juani devuelve 403 “Permission denied to juaniarrigoni”; GitHub connector create_branch también 403 “Resource not accessible by integration”. Commit de implementación/docs 9844b3722a8515136a288fee356466c302690164, rama solo local; pendiente permiso colaborador/invitación. No se creó fork ni PR.
+- Pendiente: subir con git push -u origin rama-juani tras habilitar permisos, revisión del grupo y cátedra de remitos mixtos, alcance compras y formato de entrega; revisar límites de DAO genérico, idempotencia de ventas, cancelaciones, login y despliegue.
 
 ## 2026-10-23 — Codex — Implementación integral inicial
 
