@@ -1,0 +1,8 @@
+flowchart TB
+    UI["Web: HTML, CSS, JavaScript"] --> HTTP["web.py: HTTP y validacion de entrada"]
+    HTTP --> Servicio["Sistema: casos de uso y transacciones"]
+    Servicio --> Modelo["Bulto, Estados, Stock y Observadores"]
+    Servicio --> DAO["DAO: ejecutar, uno, todos, insertar"]
+    DAO --> DB[("SQLite")]
+    Reportes["Reportes: filtros y calculos Decimal"] --> DAO
+    HTTP --> Reportes

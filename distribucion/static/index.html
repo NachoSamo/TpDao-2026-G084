@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#e8eee9"><title>Andén · Distribución G084</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23244c3b%22/%3E%3Cpath%20d%3D%22M6%2025V11l10-5%2010%205v14M6%2014l10%205%2010-5M16%2019v9%22%20fill%3D%22none%22%20stroke%3D%22%23d9ed9e%22%20stroke-width%3D%222%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/styles.css"><script src="/app.js" defer></script>
+</head>
+<body>
+<!-- THESIS: Tablero de bultos elegido por el usuario; ver el próximo paso antes de operar.
+OWN-WORLD: Andén, señalética de estación: verde bosque, blanco tiza, lima, Rubik local y trazos precisos.
+STORY: Seguir un bulto desde preparado a verificado; después consultar inventario y vender.
+FIRST VIEWPORT: Navegación lateral, título y filtros, seis carriles de estados con cantidades reales y acciones.
+SIGNATURE: Abrir un bulto muestra recorrido e historial; solo ofrece la siguiente transición. Seed bdbfaf05, dirección fijada por usuario, code-first. -->
+<a class="skip" href="#main">Ir al contenido</a>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="#tablero" aria-label="Andén, inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 26V10l11-6 11 6v16M5 14l11 6 11-6M16 20v10"/></svg></span><span>andén<span class="brand-sub">Distribución & locales</span></span></a>
+<nav aria-label="Secciones" id="nav"></nav>
+<div class="sidebar-bottom"><span class="live-dot"></span><span>Entorno local<span class="muted small">TP DAO · Grupo 084</span></span></div>
+</aside>
+<div class="workspace"><header class="topbar"><span>Centro de distribución <span class="slash">/</span> <span id="breadcrumb">Operaciones</span></span><div class="top-right"><span class="demo-label">Datos de demostración</span><button id="refresh" class="icon-button" aria-label="Actualizar datos" title="Actualizar datos"></button><span class="avatar" title="Grupo 084">G</span></div></header>
+<main id="main" tabindex="-1"><div class="loading">Cargando operaciones…</div></main>
+<footer>Andén <span>Inventario conectado, de origen a destino.</span><span>DAO · 2026</span></footer>
+</div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
+</body></html>

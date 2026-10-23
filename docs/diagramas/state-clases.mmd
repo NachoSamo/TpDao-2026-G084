@@ -1,0 +1,33 @@
+classDiagram
+    class Bulto {
+        +int id
+        +EstadoBulto estado
+        +transicionar(accion, args)
+    }
+    class EstadoBulto {
+        +precintar(bulto)
+        +despachar(bulto)
+        +recibir(bulto)
+        +verificar(bulto, integro)
+    }
+    class Preparado {
+        +precintar(bulto)
+    }
+    class Precintado {
+        +despachar(bulto)
+    }
+    class EnTransito {
+        +recibir(bulto)
+    }
+    class Recibido {
+        +verificar(bulto, integro)
+    }
+    class Verificado
+    class Rechazado
+    Bulto --> EstadoBulto : delega
+    EstadoBulto <|-- Preparado
+    EstadoBulto <|-- Precintado
+    EstadoBulto <|-- EnTransito
+    EstadoBulto <|-- Recibido
+    EstadoBulto <|-- Verificado
+    EstadoBulto <|-- Rechazado
