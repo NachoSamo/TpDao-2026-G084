@@ -1,5 +1,10 @@
 # Memoria de sesión — TP DAO G084
 
+## 2026-10-26 — Codex — Explicación de cómo está codificado
+
+- Se amplió docs/entender-el-codigo.md con ficha de lenguajes/arquitectura, método Bulto.transicionar explicado instrucción por instrucción, mapa de efectos por comando y cómo abordar cambios/errores por capa.
+- Se reutilizó la guía existente para no duplicar documentación. Sin cambios al código de ejecución. Se preservó la eliminación local ajena de docs/mensaje-grupo.md.
+
 ## 2026-10-23 — Codex — Guía para entender el código
 
 - Se agregó docs/entender-el-codigo.md con orden de lectura, mapa de archivos, arranque, verificación/venta completas, transacciones, DAO, frontend, reportes, sintaxis Python, ejercicios y preguntas de comprensión.

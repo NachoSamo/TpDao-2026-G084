@@ -1,6 +1,19 @@
-# Entender el código de Andén
+# Explicación del código y de cómo está implementado Andén
 
 Guía de lectura para los integrantes del grupo. El objetivo es poder seguir una operación, encontrar la regla que la controla y explicar por qué se guardan determinados registros. Se describe el código que existe hoy, no una arquitectura ideal ni el modelo preliminar.
+
+## Ficha técnica: cómo está codificado
+
+- **Backend:** Python 3.12+, con clases y funciones. Usa la biblioteca estándar; no usa Flask, Django, FastAPI ni ORM.
+- **Frontend:** HTML, CSS y JavaScript directo, sin React ni un proceso de compilación. El servidor entrega esos archivos al navegador.
+- **Comunicación:** HTTP y JSON. La interfaz envía datos y recibe resultados; no ejecuta SQL.
+- **Persistencia:** SQLite con `sqlite3`, SQL parametrizado y un DAO genérico.
+- **Organización:** separación por responsabilidades: presentación, entrada HTTP, casos de uso, objetos del dominio y acceso a datos. No se implementó un framework MVC.
+- **Estilo de dominio:** combinación de orientación a objetos —State y Observer— con métodos de servicio que trabajan sobre diccionarios y registros relacionales. No todo el diagrama conceptual se convirtió en una clase Python.
+- **Validación:** tipos de entrada en la API; reglas del negocio en servicios/modelos; restricciones relacionales en SQLite. Los controles de pantalla ayudan, pero no reemplazan al servidor.
+- **Idioma y nombres:** identificadores mayormente en español, métodos `snake_case`, clases `PascalCase`. Nombres como `fetch`, `render` o `request` siguen convenciones de la interfaz web.
+
+Para empezar: leer los apartados **1–4** para ubicar la estructura; **5–7** para seguir una operación completa; **9–10** para entender objetos y sintaxis; **16–18** para trabajar directamente sobre el código.
 
 ## 1. La idea central
 
@@ -366,3 +379,106 @@ Intentar contestar sin mirar y después verificar en el archivo indicado:
 10. ¿Hay clase `Venta` o `ProductoDAO`? **No en esta versión: venta/producto son registros y hay DAO genérico.**
 
 Para profundizar: [patrones](patrones-de-diseno.md), [persistencia](persistencia.md), [pruebas y decisiones](pruebas-y-decisiones.md) y [defensa](defensa.md).
+
+## 16. Leer un método real, instrucción por instrucción
+
+Este fragmento pertenece a `Bulto` en [modelos.py](../distribucion/modelos.py):
+
+```python
+@dataclass
+class Bulto:
+    id: int
+    estado: EstadoBulto
+
+    def transicionar(self, accion, *args):
+        anterior = self.estado.nombre
+        getattr(self.estado, accion)(self, *args)
+        return anterior, self.estado.nombre
+```
+
+**`@dataclass`:** evita escribir a mano un constructor simple. Permite crear `Bulto(3, Preparado())`; ese objeto tiene `id=3` y `estado` apuntando a una instancia de `Preparado`.
+
+**`id: int` y `estado: EstadoBulto`:** son anotaciones de tipo, no columnas de SQLite ni validaciones automáticas. Python no impide por sí solo pasar un tipo equivocado; el sistema debe validar sus entradas.
+
+**`self`:** es ese bulto particular. Dos bultos pueden tener objetos de estado diferentes aunque sean de la misma clase `Bulto`.
+
+**`accion`:** es el nombre del método que se quiere ejecutar, como `'precintar'`. El servicio pasa nombres conocidos, no instrucciones de Python escritas por el usuario.
+
+**`*args`:** permite pasar argumentos extra cuando una acción los necesita. Verificar recibe la condición del precinto; precintar no necesita ese parámetro dentro del objeto State.
+
+**`anterior = self.estado.nombre`:** conserva el estado previo antes de ejecutar la operación. Se usa luego para el historial.
+
+**`getattr(self.estado, accion)(self, *args)`:** busca el método en el objeto de estado actual y lo llama, pasándole el bulto como contexto. Si el estado es `Preparado` y la acción es `'precintar'`, equivale a `self.estado.precintar(self)`.
+
+**`return anterior, self.estado.nombre`:** devuelve una tupla de dos valores. El servicio puede recibirla con `anterior, nuevo = obj.transicionar(...)` y persistir el cambio.
+
+La asignación `bulto.estado = Precintado()` cambia la referencia al objeto de estado en memoria. No hace un UPDATE por sí sola. El servicio es quien guarda el nombre nuevo en SQLite y crea el historial, dentro de la transacción.
+
+### Un registro no es lo mismo que un objeto del dominio
+
+```python
+fila = {'id': 3, 'estado': 'PREPARADO'}
+objeto = Bulto(fila['id'], ESTADOS[fila['estado']]())
+```
+
+En la primera línea, el estado es texto. En la segunda, `ESTADOS['PREPARADO']` devuelve la clase `Preparado`; los paréntesis crean una instancia y `Bulto` recibe ese objeto. A partir de ahí puede delegarle comportamiento. El diccionario por sí solo no tiene métodos como `precintar`.
+
+## 17. Qué modifica cada operación del servicio
+
+Este mapa ayuda a encontrar un error o explicar una pantalla. Se indican efectos principales; las validaciones se ejecutan antes o dentro de la misma transacción.
+
+| Método de `Sistema` | Qué representa | Qué registra o cambia |
+|---|---|---|
+| `guardar` | Alta o modificación del catálogo | Fila de sucursal/categoría/proveedor/producto; devuelve su ID. |
+| `baja` | Baja lógica | `activo=0`; conserva registros anteriores. |
+| `asociar_proveedor` | Relación de compra | Costo y proveedor principal en `producto_proveedor`. |
+| `ingresar_proveedor` | Ingreso al CD | `ingreso`, stock, movimiento y costo actual del producto. |
+| `definir_minimo` | Umbral de reposición | Mínimo del stock y eventual aviso/reposición de Observer. |
+| `crear_orden` | Pedido CD → local | Cabecera de orden y detalles por producto. |
+| `crear_remito` | Agrupar un despacho | Remito asociado a una orden. |
+| `preparar_bulto` | Apartar mercadería para enviar | Reserva de stock, bulto, contenido e historial inicial. |
+| `precintar` | Cerrar con código de seguridad | Estado, código de precinto e historial. |
+| `despachar` | Sacar el remito del CD | Estados de sus bultos, historial, liberación de reservas y egresos. |
+| `recibir` | Registrar llegada física | Estado Recibido, condición del precinto e historial; sin ingreso vendible. |
+| `verificar` | Aprobar o rechazar el contenido | Estado, historial, motivo, estado agregado del remito y stock si se aprueba; eventual Observer. |
+| `vender` | Confirmar operación comercial | Venta, detalles, comprobante, cobros, egresos y eventual reposición. |
+| `devolver` | Reintegrar sobre una venta | Devolución, reintegro registrado y reingreso de stock apto. |
+
+`_stock`, `_mover`, `_historial`, `_transicion`, `_avisar` y `_orden` son auxiliares internos. Reutilizan pasos de los casos de uso; no son pantallas ni comandos públicos independientes.
+
+## 18. Cómo abordar un cambio sin perderse
+
+### Si el cambio es visual
+
+Buscar la sección en `render...` de `app.js` y sus clases en `styles.css`. Un cambio de color o espaciado normalmente no requiere tocar SQLite ni `Sistema`.
+
+### Si cambia una regla del negocio
+
+Ejemplo: no permitir devolución después de cierto plazo. La condición debe implementarse en `Sistema.devolver` usando la fecha de venta, y probarse con casos dentro/fuera del plazo. La pantalla puede explicar el límite, pero no debe ser el único lugar que lo controle.
+
+### Si aparece un nuevo dato persistente
+
+Ejemplo: agregar una descripción a los productos. Revisar en conjunto:
+
+1. **Esquema:** columna y cambio de bases ya creadas. `CREATE TABLE IF NOT EXISTS` no agrega columnas a una tabla existente.
+2. **Servicio:** campos aceptados y validaciones de `guardar`.
+3. **API:** formato y tipos que acepta `ejecutar_accion`.
+4. **Interfaz:** formulario, envío y presentación.
+5. **Demo y tests:** datos válidos, creación/modificación y compatibilidad esperada.
+6. **Documentación:** actualizar el modelo y las instrucciones si cambió el esquema.
+
+La tarea no es agregar el input y confiar en que se guarde automáticamente: cada capa tiene una responsabilidad explícita.
+
+### Si cambia un estado o transición
+
+Revisar la clase concreta en `modelos.py`, su registro en `ESTADOS`, los efectos en `Sistema`, la acción ofrecida por `actionFor` y el carril/nombre en `app.js`. Después actualizar los diagramas y probar tanto el camino válido como los saltos prohibidos. La interfaz no debe permitir una acción que el dominio desconoce ni el dominio depender de que el botón esté oculto.
+
+### Si algo falla al usar la app
+
+1. ¿El formulario envió una solicitud? Revisar la pestaña Network del navegador.
+2. ¿La API devuelve un mensaje de validación? Leer el estado HTTP y el JSON.
+3. ¿Qué método de `Sistema` corresponde a esa acción? Ubicar la regla y los auxiliares que llama.
+4. ¿Falló una transición, un límite de stock o una restricción SQLite? Separar las causas antes de cambiar código.
+5. ¿Se revirtió la operación? Verificar los registros, no solo el mensaje visual.
+
+Para entenderlo entre los tres, cada uno puede elegir una operación del apartado 17 y explicarla siguiendo las mismas cinco preguntas. Si puede ubicar datos de entrada, validación, objetos, escrituras y resultado, entendió el recorrido principal.
