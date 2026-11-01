@@ -83,39 +83,38 @@
 <script>
 // [tabla, grupo, [columna, fila], columnas [nombre, tipo, flags], restricciones]
 const TABLAS = [
-  ['proveedor', 'catalogo', [1, 1], [['id', 'INTEGER', 'PK'], ['razon_social', 'TEXT'], ['cuit', 'TEXT', 'UQ'], ['telefono', 'TEXT']], ['RN-05: cuit único']],
-  ['producto_proveedor', 'catalogo', [2, 1], [['producto_id', 'INTEGER', 'PK FK'], ['proveedor_id', 'INTEGER', 'PK FK'], ['costo_unitario', 'TEXT'], ['principal', 'INTEGER']], ['principal IN (0,1)']],
-  ['producto', 'catalogo', [3, 1], [['id', 'INTEGER', 'PK'], ['codigo', 'TEXT', 'UQ'], ['nombre', 'TEXT'], ['categoria_id', 'INTEGER', 'FK'], ['precio_lista', 'TEXT'], ['costo_actual', 'TEXT'],
-    ['tipo_precio', 'TEXT'], ['porcentaje_descuento', 'TEXT'], ['vigente_hasta', 'TEXT'], ['cantidad_minima', 'INTEGER']],
-    ['RN-05: codigo único', "tipo_precio IN ('LISTA','PROMOCIONAL','VOLUMEN')", 'Strategy: params del precio en la misma fila']],
-  ['categoria', 'catalogo', [4, 1], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT', 'UQ']], []],
+  ['proveedor', 'catalogo', [3, 1], [['id', 'INTEGER', 'PK'], ['razon_social', 'TEXT'], ['cuit', 'TEXT', 'UQ'], ['telefono', 'TEXT']], ['RN-05: cuit único']],
+  ['producto_proveedor', 'catalogo', [4, 1], [['producto_id', 'INTEGER', 'PK FK'], ['proveedor_id', 'INTEGER', 'PK FK'], ['costo_unitario', 'TEXT'], ['principal', 'INTEGER']], ['principal IN (0,1)']],
+  ['producto', 'catalogo', [4, 2], [['id', 'INTEGER', 'PK'], ['codigo', 'TEXT', 'UQ'], ['nombre', 'TEXT'], ['categoria_id', 'INTEGER', 'FK'], ['precio_lista', 'TEXT'], ['costo_actual', 'TEXT']],
+    ['RN-05: codigo único']],
+  ['categoria', 'catalogo', [3, 2], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT', 'UQ']], []],
 
-  ['sucursal', 'inventario', [1, 2], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT'], ['direccion', 'TEXT'], ['tipo', 'TEXT']], ["tipo IN ('LOCAL','CD')"]],
-  ['stock', 'inventario', [3, 2], [['id', 'INTEGER', 'PK'], ['sucursal_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad_disponible', 'INTEGER'], ['cantidad_reservada', 'INTEGER'], ['stock_minimo', 'INTEGER']],
+  ['sucursal', 'inventario', [5, 3], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT'], ['direccion', 'TEXT'], ['tipo', 'TEXT']], ["tipo IN ('LOCAL','CD')"]],
+  ['stock', 'inventario', [5, 2], [['id', 'INTEGER', 'PK'], ['sucursal_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad_disponible', 'INTEGER'], ['cantidad_reservada', 'INTEGER'], ['stock_minimo', 'INTEGER']],
     ['UNIQUE(sucursal_id, producto_id)', 'RN-04: cantidades >= 0']],
-  ['movimiento_stock', 'inventario', [4, 2], [['id', 'INTEGER', 'PK'], ['stock_id', 'INTEGER', 'FK'], ['fecha_hora', 'TEXT'], ['tipo', 'TEXT'], ['cantidad', 'INTEGER'], ['costo_unitario', 'TEXT'], ['referencia', 'TEXT']],
+  ['movimiento_stock', 'inventario', [4, 3], [['id', 'INTEGER', 'PK'], ['stock_id', 'INTEGER', 'FK'], ['fecha_hora', 'TEXT'], ['tipo', 'TEXT'], ['cantidad', 'INTEGER'], ['costo_unitario', 'TEXT'], ['referencia', 'TEXT']],
     ['solo INSERT (historial)']],
 
-  ['orden_reposicion', 'logistica', [1, 3], [['id', 'INTEGER', 'PK'], ['fecha', 'TEXT'], ['estado', 'TEXT'], ['origen_id', 'INTEGER', 'FK'], ['destino_id', 'INTEGER', 'FK']],
+  ['orden_reposicion', 'logistica', [4, 4], [['id', 'INTEGER', 'PK'], ['fecha', 'TEXT'], ['estado', 'TEXT'], ['origen_id', 'INTEGER', 'FK'], ['destino_id', 'INTEGER', 'FK']],
     ['RN-07: origen_id <> destino_id', '(CD/LOCAL se valida en Python)']],
-  ['detalle_orden_reposicion', 'logistica', [2, 3], [['id', 'INTEGER', 'PK'], ['orden_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad_solicitada', 'INTEGER'], ['cantidad_enviada', 'INTEGER']],
+  ['detalle_orden_reposicion', 'logistica', [3, 3], [['id', 'INTEGER', 'PK'], ['orden_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad_solicitada', 'INTEGER'], ['cantidad_enviada', 'INTEGER']],
     ['UNIQUE(orden_id, producto_id)', 'RN-08: enviada <= solicitada']],
-  ['remito', 'logistica', [1, 4], [['id', 'INTEGER', 'PK'], ['orden_id', 'INTEGER', 'FK'], ['numero', 'TEXT', 'UQ'], ['fecha_emision', 'TEXT'], ['estado', 'TEXT']], []],
+  ['remito', 'logistica', [3, 4], [['id', 'INTEGER', 'PK'], ['orden_id', 'INTEGER', 'FK'], ['numero', 'TEXT', 'UQ'], ['fecha_emision', 'TEXT'], ['estado', 'TEXT']], []],
   ['bulto', 'logistica', [2, 4], [['id', 'INTEGER', 'PK'], ['remito_id', 'INTEGER', 'FK'], ['codigo_precinto', 'TEXT', 'UQ'], ['fecha_creacion', 'TEXT'], ['estado_actual', 'TEXT']],
     ['estado_actual IN (', "  'PREPARADO','PRECINTADO','EN_TRANSITO',", "  'RECIBIDO','VERIFICADO','RECHAZADO')"]],
-  ['detalle_bulto', 'logistica', [3, 4], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK'], ['detalle_orden_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER']], ['cantidad > 0']],
-  ['cambio_estado_bulto', 'logistica', [1, 5], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK'], ['fecha_hora', 'TEXT'], ['estado_anterior', 'TEXT'], ['estado_nuevo', 'TEXT'], ['responsable', 'TEXT'], ['observacion', 'TEXT']],
+  ['detalle_bulto', 'logistica', [2, 3], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK'], ['detalle_orden_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER']], ['cantidad > 0']],
+  ['cambio_estado_bulto', 'logistica', [1, 4], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK'], ['fecha_hora', 'TEXT'], ['estado_anterior', 'TEXT'], ['estado_nuevo', 'TEXT'], ['responsable', 'TEXT'], ['observacion', 'TEXT']],
     ['RN-03: triggers bloquean UPDATE y DELETE']],
-  ['recepcion', 'logistica', [2, 5], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK UQ'], ['fecha_recepcion', 'TEXT'], ['precinto_integro', 'INTEGER'], ['responsable', 'TEXT'], ['observaciones', 'TEXT']],
+  ['recepcion', 'logistica', [1, 3], [['id', 'INTEGER', 'PK'], ['bulto_id', 'INTEGER', 'FK UQ'], ['fecha_recepcion', 'TEXT'], ['precinto_integro', 'INTEGER'], ['responsable', 'TEXT'], ['observaciones', 'TEXT']],
     ['precinto_integro IN (0,1)']],
 
-  ['detalle_venta', 'ventas', [4, 3], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER'], ['precio_unitario', 'TEXT'], ['costo_unitario', 'TEXT']], ['cantidad > 0']],
-  ['venta', 'ventas', [5, 3], [['id', 'INTEGER', 'PK'], ['sucursal_id', 'INTEGER', 'FK'], ['fecha', 'TEXT'], ['total', 'TEXT']], []],
+  ['detalle_venta', 'ventas', [5, 1], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['producto_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER'], ['precio_unitario', 'TEXT'], ['costo_unitario', 'TEXT']], ['cantidad > 0']],
+  ['venta', 'ventas', [6, 2], [['id', 'INTEGER', 'PK'], ['sucursal_id', 'INTEGER', 'FK'], ['fecha', 'TEXT'], ['total', 'TEXT']], []],
   ['cobro', 'ventas', [6, 3], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['medio_pago_id', 'INTEGER', 'FK'], ['monto', 'TEXT'], ['fecha', 'TEXT']], ['RN-10: SUM(monto) = venta.total (Python)']],
   ['medio_pago', 'ventas', [7, 3], [['id', 'INTEGER', 'PK'], ['nombre', 'TEXT', 'UQ'], ['tipo', 'TEXT']], []],
-  ['detalle_devolucion', 'ventas', [4, 4], [['id', 'INTEGER', 'PK'], ['devolucion_id', 'INTEGER', 'FK'], ['detalle_venta_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER']], ['RN-06: <= cantidadDevolvible (Python)']],
-  ['devolucion', 'ventas', [5, 4], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['fecha', 'TEXT'], ['motivo', 'TEXT'], ['monto_reintegrado', 'TEXT']], []],
-  ['comprobante', 'ventas', [6, 4], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK UQ'], ['numero', 'TEXT', 'UQ'], ['tipo', 'TEXT'], ['fecha_emision', 'TEXT']], []],
+  ['detalle_devolucion', 'ventas', [6, 1], [['id', 'INTEGER', 'PK'], ['devolucion_id', 'INTEGER', 'FK'], ['detalle_venta_id', 'INTEGER', 'FK'], ['cantidad', 'INTEGER']], ['RN-06: <= cantidadDevolvible (Python)']],
+  ['devolucion', 'ventas', [7, 1], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK'], ['fecha', 'TEXT'], ['motivo', 'TEXT'], ['monto_reintegrado', 'TEXT']], []],
+  ['comprobante', 'ventas', [7, 2], [['id', 'INTEGER', 'PK'], ['venta_id', 'INTEGER', 'FK UQ'], ['numero', 'TEXT', 'UQ'], ['tipo', 'TEXT'], ['fecha_emision', 'TEXT']], []],
 ];
 
 // [tabla hija (tiene la FK), tabla padre, cardinalidad del lado hijo: N | 1N | 01, etiqueta]
@@ -229,5 +228,6 @@ function escalar() {
 zoom.addEventListener('input', escalar);
 dibujar(); escalar();
 </script>
+<script src="exportar-imagen.js"></script>
 </body>
 </html>

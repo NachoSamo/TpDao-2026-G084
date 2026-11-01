@@ -54,7 +54,7 @@
 <header class="top">
   <h1>Diagrama de Clases — TP DAO Tema 3</h1>
   <div class="legend">
-    <span><i style="background:var(--catalogo)"></i>Catálogo (Strategy)</span>
+    <span><i style="background:var(--catalogo)"></i>Catálogo</span>
     <span><i style="background:var(--inventario)"></i>Inventario (Observer)</span>
     <span><i style="background:var(--logistica)"></i>Logística</span>
     <span><i style="background:var(--estado)"></i>Estados del bulto (State)</span>
@@ -80,53 +80,49 @@
 <script>
 // [nombre, grupo, [columna, fila], estereotipo, atributos, métodos]
 const CLASES = [
-  ['Proveedor', 'catalogo', [1, 1], '', ['- Long id', '- String razonSocial', '- String cuit', '- String telefono'], []],
-  ['ProductoProveedor', 'catalogo', [2, 1], '', ['- BigDecimal costoUnitario', '- boolean principal'], []],
-  ['Producto', 'catalogo', [3, 1], '', ['- Long id', '- String codigo', '- String nombre', '- BigDecimal precioLista', '- BigDecimal costoActual'], ['+ calcularPrecio(cantidad: int) : BigDecimal']],
-  ['EstrategiaPrecio', 'catalogo', [4, 1], 'interface', [], ['+ calcular(precio: BigDecimal, cantidad: int) : BigDecimal']],
-  ['Categoria', 'catalogo', [2, 2], '', ['- Long id', '- String nombre'], []],
-  ['PrecioLista', 'catalogo', [4, 2], '', [], []],
-  ['PrecioPromocional', 'catalogo', [5, 2], '', ['- BigDecimal porcentajeDescuento', '- LocalDate vigenteHasta'], []],
-  ['PrecioPorVolumen', 'catalogo', [6, 2], '', ['- int cantidadMinima', '- BigDecimal porcentajeDescuento'], []],
+  ['Proveedor', 'catalogo', [7, 1], '', ['- Long id', '- String razonSocial', '- String cuit', '- String telefono'], []],
+  ['ProductoProveedor', 'catalogo', [6, 1], '', ['- BigDecimal costoUnitario', '- boolean principal'], []],
+  ['Producto', 'catalogo', [6, 2], '', ['- Long id', '- String codigo', '- String nombre', '- BigDecimal precioLista', '- BigDecimal costoActual'], []],
+  ['Categoria', 'catalogo', [7, 2], '', ['- Long id', '- String nombre'], []],
 
-  ['Sucursal', 'inventario', [1, 3], '', ['- Long id', '- String nombre', '- String direccion', '- TipoSucursal tipo'], ['+ esCentroDistribucion() : boolean']],
-  ['Stock', 'inventario', [3, 3], '', ['- Long id', '- int cantidadDisponible', '- int cantidadReservada', '- int stockMinimo'],
+  ['Sucursal', 'inventario', [4, 3], '', ['- Long id', '- String nombre', '- String direccion', '- TipoSucursal tipo'], ['+ esCentroDistribucion() : boolean']],
+  ['Stock', 'inventario', [5, 2], '', ['- Long id', '- int cantidadDisponible', '- int cantidadReservada', '- int stockMinimo'],
     ['+ disponibleParaVenta() : int', '+ ingresarVerificado(cantidad: int)', '+ egresar(cantidad: int)', '+ estaBajoMinimo() : boolean', '+ agregarObservador(o: ObservadorStock)']],
-  ['MovimientoStock', 'inventario', [4, 3], '', ['- LocalDateTime fechaHora', '- TipoMovimiento tipo', '- int cantidad', '- BigDecimal costoUnitario', '- String referencia'], []],
-  ['ObservadorStock', 'inventario', [3, 4], 'interface', [], ['+ stockBajoMinimo(stock: Stock)']],
-  ['GeneradorReposicionAutomatica', 'inventario', [2, 4], '', [], ['+ stockBajoMinimo(stock: Stock)']],
+  ['MovimientoStock', 'inventario', [5, 1], '', ['- LocalDateTime fechaHora', '- TipoMovimiento tipo', '- int cantidad', '- BigDecimal costoUnitario', '- String referencia'], []],
+  ['ObservadorStock', 'inventario', [4, 2], 'interface', [], ['+ stockBajoMinimo(stock: Stock)']],
+  ['GeneradorReposicionAutomatica', 'inventario', [3, 2], '', [], ['+ stockBajoMinimo(stock: Stock)']],
 
-  ['OrdenReposicion', 'logistica', [1, 4], '', ['- Long id', '- LocalDate fecha', '- EstadoOrden estado'], ['+ consolidar(necesidades: List<DetalleOrdenReposicion>)', '+ confirmar()', '+ cerrar()']],
-  ['Remito', 'logistica', [1, 5], '', ['- Long id', '- String numero', '- LocalDateTime fechaEmision', '- EstadoRemito estado'], ['+ despachar()', '+ actualizarEstadoSegunBultos()']],
-  ['DetalleOrdenReposicion', 'logistica', [2, 5], '', ['- int cantidadSolicitada', '- int cantidadEnviada'], []],
-  ['CambioEstadoBulto', 'logistica', [1, 6], '', ['- LocalDateTime fechaHora', '- String estadoAnterior', '- String estadoNuevo', '- String responsable', '- String observacion'], []],
-  ['BultoContenedor', 'logistica', [2, 6], '', ['- Long id', '- String codigoPrecinto', '- LocalDateTime fechaCreacion', '- EstadoBulto estadoActual'],
+  ['OrdenReposicion', 'logistica', [3, 3], '', ['- Long id', '- LocalDate fecha', '- EstadoOrden estado'], ['+ consolidar(necesidades: List<DetalleOrdenReposicion>)', '+ confirmar()', '+ cerrar()']],
+  ['Remito', 'logistica', [2, 2], '', ['- Long id', '- String numero', '- LocalDateTime fechaEmision', '- EstadoRemito estado'], ['+ despachar()', '+ actualizarEstadoSegunBultos()']],
+  ['DetalleOrdenReposicion', 'logistica', [4, 4], '', ['- int cantidadSolicitada', '- int cantidadEnviada'], []],
+  ['CambioEstadoBulto', 'logistica', [1, 3], '', ['- LocalDateTime fechaHora', '- String estadoAnterior', '- String estadoNuevo', '- String responsable', '- String observacion'], []],
+  ['BultoContenedor', 'logistica', [2, 3], '', ['- Long id', '- String codigoPrecinto', '- LocalDateTime fechaCreacion', '- EstadoBulto estadoActual'],
     ['+ precintar()', '+ despachar()', '+ recibir()', '+ verificar()', '+ rechazar(motivo: String)']],
-  ['DetalleBulto', 'logistica', [3, 6], '', ['- int cantidad'], []],
-  ['Recepcion', 'logistica', [1, 7], '', ['- Long id', '- LocalDateTime fechaRecepcion', '- boolean precintoIntegro', '- String responsable', '- String observaciones'], ['+ registrar()']],
+  ['DetalleBulto', 'logistica', [3, 4], '', ['- int cantidad'], []],
+  ['Recepcion', 'logistica', [1, 4], '', ['- Long id', '- LocalDateTime fechaRecepcion', '- boolean precintoIntegro', '- String responsable', '- String observaciones'], ['+ registrar()']],
 
-  ['EstadoBulto', 'estado', [2, 7], 'abstract', [], ['+ nombre() : String', '+ precintar(b: BultoContenedor)', '+ despachar(b: BultoContenedor)', '+ recibir(b: BultoContenedor)', '+ verificar(b: BultoContenedor)', '+ rechazar(b: BultoContenedor, motivo: String)']],
-  ['EstadoPreparado', 'estado', [1, 8], '', [], ['+ precintar(b: BultoContenedor)']],
-  ['EstadoPrecintado', 'estado', [2, 8], '', [], ['+ despachar(b: BultoContenedor)']],
-  ['EstadoEnTransito', 'estado', [3, 8], '', [], ['+ recibir(b: BultoContenedor)']],
-  ['EstadoRecibido', 'estado', [4, 8], '', [], ['+ verificar(b: BultoContenedor)', '+ rechazar(b: BultoContenedor, motivo: String)']],
-  ['EstadoVerificado', 'estado', [5, 8], '', [], []],
-  ['EstadoRechazado', 'estado', [6, 8], '', [], []],
+  ['EstadoBulto', 'estado', [2, 6], 'abstract', [], ['+ nombre() : String', '+ precintar(b: BultoContenedor)', '+ despachar(b: BultoContenedor)', '+ recibir(b: BultoContenedor)', '+ verificar(b: BultoContenedor)', '+ rechazar(b: BultoContenedor, motivo: String)']],
+  ['EstadoPreparado', 'estado', [1, 5], '', [], ['+ precintar(b: BultoContenedor)']],
+  ['EstadoPrecintado', 'estado', [1, 6], '', [], ['+ despachar(b: BultoContenedor)']],
+  ['EstadoEnTransito', 'estado', [1, 7], '', [], ['+ recibir(b: BultoContenedor)']],
+  ['EstadoRecibido', 'estado', [2, 7], '', [], ['+ verificar(b: BultoContenedor)', '+ rechazar(b: BultoContenedor, motivo: String)']],
+  ['EstadoVerificado', 'estado', [3, 7], '', [], []],
+  ['EstadoRechazado', 'estado', [3, 6], '', [], []],
 
-  ['DetalleDevolucion', 'ventas', [4, 4], '', ['- int cantidad'], []],
-  ['Devolucion', 'ventas', [5, 4], '', ['- Long id', '- LocalDateTime fecha', '- String motivo', '- BigDecimal montoReintegrado'], ['+ validar()', '+ calcularReintegro() : BigDecimal']],
-  ['Venta', 'ventas', [6, 4], '', ['- Long id', '- LocalDateTime fecha', '- BigDecimal total'],
+  ['DetalleDevolucion', 'ventas', [7, 4], '', ['- int cantidad'], []],
+  ['Devolucion', 'ventas', [6, 4], '', ['- Long id', '- LocalDateTime fecha', '- String motivo', '- BigDecimal montoReintegrado'], ['+ validar()', '+ calcularReintegro() : BigDecimal']],
+  ['Venta', 'ventas', [5, 4], '', ['- Long id', '- LocalDateTime fecha', '- BigDecimal total'],
     ['+ agregarDetalle(producto: Producto, cantidad: int)', '+ calcularTotal() : BigDecimal', '+ registrarCobro(medio: MedioPago, monto: BigDecimal)', '+ emitirComprobante() : Comprobante']],
-  ['Comprobante', 'ventas', [7, 4], '', ['- String numero', '- String tipo', '- LocalDateTime fechaEmision'], []],
-  ['DetalleVenta', 'ventas', [5, 5], '', ['- int cantidad', '- BigDecimal precioUnitario', '- BigDecimal costoUnitario'], ['+ subtotal() : BigDecimal', '+ cantidadDevolvible() : int']],
+  ['Comprobante', 'ventas', [5, 5], '', ['- String numero', '- String tipo', '- LocalDateTime fechaEmision'], []],
+  ['DetalleVenta', 'ventas', [6, 3], '', ['- int cantidad', '- BigDecimal precioUnitario', '- BigDecimal costoUnitario'], ['+ subtotal() : BigDecimal', '+ cantidadDevolvible() : int']],
   ['Cobro', 'ventas', [6, 5], '', ['- BigDecimal monto', '- LocalDateTime fecha'], []],
   ['MedioPago', 'ventas', [7, 5], '', ['- Long id', '- String nombre', '- TipoMedioPago tipo'], []],
 
   ['Reporte', 'reportes', [6, 6], 'interface', [], ['+ generar(filtro: FiltroReporte) : ResultadoReporte']],
-  ['ReporteVentasPorPeriodo', 'reportes', [4, 7], '', [], []],
-  ['ReporteMasVendidosYMargen', 'reportes', [5, 7], '', [], []],
+  ['ReporteVentasPorPeriodo', 'reportes', [7, 7], '', [], []],
+  ['ReporteMasVendidosYMargen', 'reportes', [5, 6], '', [], []],
   ['ReporteBultosRechazados', 'reportes', [6, 7], '', [], []],
-  ['ReporteTiempoTransito', 'reportes', [7, 7], '', [], []],
+  ['ReporteTiempoTransito', 'reportes', [7, 6], '', [], []],
 ];
 
 // [desde, hacia, tipo, etiqueta, cardinalidad desde, cardinalidad hacia]
@@ -135,10 +131,6 @@ const RELACIONES = [
   ['Categoria', 'Producto', 'asoc', 'clasifica', '1', '*'],
   ['Producto', 'ProductoProveedor', 'asoc', '', '1', '*'],
   ['Proveedor', 'ProductoProveedor', 'asoc', '', '1', '*'],
-  ['Producto', 'EstrategiaPrecio', 'asoc', 'usa', '', ''],
-  ['EstrategiaPrecio', 'PrecioLista', 'impl'],
-  ['EstrategiaPrecio', 'PrecioPromocional', 'impl'],
-  ['EstrategiaPrecio', 'PrecioPorVolumen', 'impl'],
   ['Sucursal', 'Stock', 'asoc', 'almacena', '1', '*'],
   ['Producto', 'Stock', 'asoc', '', '1', '*'],
   ['Stock', 'MovimientoStock', 'comp', '', '1', '*'],
@@ -262,5 +254,6 @@ function escalar() {
 zoom.addEventListener('input', escalar);
 dibujar(); escalar();
 </script>
+<script src="exportar-imagen.js"></script>
 </body>
 </html>
