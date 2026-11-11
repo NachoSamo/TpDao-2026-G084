@@ -15,7 +15,7 @@ from .servicios import Sistema
 TABLAS = ('sucursal', 'categoria', 'proveedor', 'producto',
           'producto_proveedor', 'stock', 'movimiento', 'ingreso', 'orden',
           'detalle_orden', 'remito', 'bulto', 'detalle_bulto', 'historial',
-          'venta', 'detalle_venta', 'cobro', 'devolucion', 'aviso')
+          'venta', 'detalle_venta', 'cobro', 'devolucion', 'aviso', 'merma')
 MAX_PAYLOAD = 65536
 STATIC = Path(__file__).parent / 'static'
 

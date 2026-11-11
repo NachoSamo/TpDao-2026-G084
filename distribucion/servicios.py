@@ -25,7 +25,7 @@ class Sistema:
         self.observadores = [GeneradorReposicionAutomatica(self)]
 
     def listar(self, tabla):
-        permitidas = {'sucursal','categoria','proveedor','producto','producto_proveedor','stock','movimiento','ingreso','orden','detalle_orden','remito','bulto','detalle_bulto','historial','venta','detalle_venta','cobro','devolucion','aviso'}
+        permitidas = {'sucursal','categoria','proveedor','producto','producto_proveedor','stock','movimiento','ingreso','orden','detalle_orden','remito','bulto','detalle_bulto','historial','venta','detalle_venta','cobro','devolucion','aviso','merma'}
         if tabla not in permitidas:
             raise ValueError('Tabla desconocida')
         return self.dao.todos(f'SELECT * FROM {tabla}')
@@ -229,13 +229,18 @@ class Sistema:
     @atomico
     def verificar(self,id,responsable,motivo=''):
         b = self.dao.uno('SELECT b.*,o.destino_id FROM bulto b JOIN remito r ON r.id=b.remito_id JOIN orden o ON o.id=r.orden_id WHERE b.id=?',(id,))
+        # Primero el estado (State decide si se puede verificar); luego el motivo. Si falla, rollback.
+        self._transicion(id,'verificar',responsable,bool(b['integro']))
         if not b['integro'] and not motivo.strip():
             raise ValueError('Rechazo requiere motivo')
-        self._transicion(id,'verificar',responsable,bool(b['integro']))
         self.dao.ejecutar('UPDATE bulto SET motivo=? WHERE id=?',(motivo.strip(),id))
         if b['integro']:
             for d in self.dao.todos('SELECT * FROM detalle_bulto WHERE bulto_id=?',(id,)):
                 self._mover(b['destino_id'],d['producto_id'],d['cantidad'],'RECEPCION_VERIFICADA',f'bulto:{id}')
+        else:
+            # Merma: lo despachado ya salió del CD y no ingresa al local; queda valorizado al costo vigente.
+            for d in self.dao.todos('SELECT d.*,p.costo FROM detalle_bulto d JOIN producto p ON p.id=d.producto_id WHERE d.bulto_id=?',(id,)):
+                self.dao.insertar('merma',fecha=ahora(),bulto_id=id,sucursal_id=b['destino_id'],producto_id=d['producto_id'],cantidad=d['cantidad'],costo=d['costo'],motivo=motivo.strip())
         estados = [x['estado'] for x in self.dao.todos('SELECT estado FROM bulto WHERE remito_id=?',(b['remito_id'],))]
         terminales = {'VERIFICADO','RECHAZADO'}
         estado = ('VERIFICADO' if set(estados)=={'VERIFICADO'} else 'RECHAZADO' if set(estados)=={'RECHAZADO'} else 'PARCIALMENTE_ACEPTADO') if set(estados)<=terminales else 'EN_REVISION'

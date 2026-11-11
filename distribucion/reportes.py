@@ -33,7 +33,11 @@ class Reportes:
             return [dict(producto=k[0],nombre=k[1],unidades_netas=v[0],ingresos_netos=str(v[1]),margen=str(v[2])) for k,v in sorted(grupos.items(),key=lambda x:(-x[1][0],x[0][0]))[:top]]
         if tipo=='rechazos':
             filas=self.s.dao.todos("SELECT b.id,b.motivo,o.destino_id,h.fecha,SUM(d.cantidad) unidades FROM bulto b JOIN remito r ON r.id=b.remito_id JOIN orden o ON o.id=r.orden_id JOIN historial h ON h.bulto_id=b.id AND h.nuevo='RECHAZADO' JOIN detalle_bulto d ON d.bulto_id=b.id GROUP BY b.id")
-            return [dict(bulto=f['id'],destino=f['destino_id'],fecha=f['fecha'],unidades=f['unidades'],motivo=f['motivo'],merma='NO DETERMINADA') for f in filas if incluye(f['fecha'],f['destino_id'])]
+            mermas=defaultdict(lambda: Decimal('0'))
+            for m in self.s.dao.todos('SELECT bulto_id,cantidad,costo FROM merma'):
+                mermas[m['bulto_id']]+=Decimal(m['costo'])*m['cantidad']
+            # Rechazos previos a registrar merma no tienen valorización.
+            return [dict(bulto=f['id'],destino=f['destino_id'],fecha=f['fecha'],unidades=f['unidades'],motivo=f['motivo'],merma=str(mermas[f['id']]) if f['id'] in mermas else 'NO DETERMINADA') for f in filas if incluye(f['fecha'],f['destino_id'])]
         if tipo=='transito':
             grupos=defaultdict(list)
             filas=self.s.dao.todos("SELECT b.id,o.destino_id,s.fecha salida,l.fecha llegada FROM bulto b JOIN remito r ON r.id=b.remito_id JOIN orden o ON o.id=r.orden_id JOIN historial s ON s.bulto_id=b.id AND s.nuevo='EN_TRANSITO' JOIN historial l ON l.bulto_id=b.id AND l.nuevo='RECIBIDO'")

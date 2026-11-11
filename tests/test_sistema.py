@@ -81,6 +81,18 @@ class CasoSistema(unittest.TestCase):
         self.assertEqual(self.s.listar('remito')[0]['estado'],'PARCIALMENTE_ACEPTADO')
         self.assertEqual(Reportes(self.s).generar('rechazos')[0]['unidades'],10)
 
+    def test_rechazo_registra_merma_valorizada_e_inmutable(self):
+        r,b=self.bulto(10);self.s.precintar(b,'PM','A');self.s.despachar(r,'A');self.s.recibir(b,False,'B');self.s.verificar(b,'B','Roto')
+        merma=self.s.listar('merma')
+        self.assertEqual([(m['bulto_id'],m['sucursal_id'],m['cantidad'],m['costo'],m['motivo']) for m in merma],[(b,self.local,10,'4.05','Roto')])
+        self.assertEqual(self.stock(self.cd)['cantidad'],90)
+        self.assertFalse(self.s.dao.todos('SELECT * FROM stock WHERE sucursal_id=? AND cantidad>0',(self.local,)))
+        self.assertEqual(Reportes(self.s).generar('rechazos')[0]['merma'],'40.50')
+        for sql in ('UPDATE merma SET cantidad=1','DELETE FROM merma'):
+            with self.assertRaises(sqlite3.IntegrityError):self.s.dao.ejecutar(sql)
+        r2,b2=self.abastecer(5)
+        self.assertEqual(len(self.s.listar('merma')),1)
+
     def test_state_no_doble_ingreso_despacho_recepcion(self):
         r,b=self.abastecer()
         for fn in (lambda:self.s.verificar(b,'A'),lambda:self.s.recibir(b,True,'A'),lambda:self.s.despachar(r,'A'),lambda:self.s.precintar(b,'Otro','A')):
