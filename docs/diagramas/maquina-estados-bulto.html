@@ -47,8 +47,8 @@
 </head>
 <body>
 <main>
-  <h1>Máquina de estados — BultoContenedor</h1>
-  <p class="sub">Patrón State: <code>BultoContenedor</code> delega cada acción en su <code>estadoActual</code> (subclase de <code>EstadoBulto</code>). Toda transición registra un <code>CambioEstadoBulto</code>.</p>
+  <h1>Máquina de estados — Bulto</h1>
+  <p class="sub">Patrón State: <code>Bulto</code> delega cada acción en su <code>estado</code> (subclase de <code>EstadoBulto</code>). Toda transición registra un <code>CambioEstadoBulto</code>.</p>
 
   <div class="diagram">
     <svg viewBox="0 0 1360 390" role="img" aria-label="Preparado, Precintado, En tránsito, Recibido; desde Recibido pasa a Verificado o Rechazado">
@@ -64,23 +64,23 @@
       <!-- estados -->
       <g class="st"><rect x="80" y="160" width="150" height="70" rx="14"/>
         <text class="n" x="155" y="190" text-anchor="middle">Preparado</text>
-        <text class="c" x="155" y="210" text-anchor="middle">EstadoPreparado</text></g>
+        <text class="c" x="155" y="210" text-anchor="middle">Preparado</text></g>
       <g class="st"><rect x="340" y="160" width="150" height="70" rx="14"/>
         <text class="n" x="415" y="190" text-anchor="middle">Precintado</text>
-        <text class="c" x="415" y="210" text-anchor="middle">EstadoPrecintado</text></g>
+        <text class="c" x="415" y="210" text-anchor="middle">Precintado</text></g>
       <g class="st"><rect x="600" y="160" width="150" height="70" rx="14"/>
         <text class="n" x="675" y="190" text-anchor="middle">En tránsito</text>
-        <text class="c" x="675" y="210" text-anchor="middle">EstadoEnTransito</text></g>
+        <text class="c" x="675" y="210" text-anchor="middle">EnTransito</text></g>
       <g class="st"><rect x="860" y="160" width="150" height="70" rx="14"/>
         <text class="n" x="935" y="190" text-anchor="middle">Recibido</text>
-        <text class="c" x="935" y="210" text-anchor="middle">EstadoRecibido</text></g>
+        <text class="c" x="935" y="210" text-anchor="middle">Recibido</text></g>
       <g class="st ok"><rect x="1100" y="30" width="180" height="90" rx="14"/>
         <text class="n" x="1190" y="58" text-anchor="middle">Verificado</text>
-        <text class="c" x="1190" y="76" text-anchor="middle">EstadoVerificado</text>
+        <text class="c" x="1190" y="76" text-anchor="middle">Verificado</text>
         <text class="e" x="1190" y="102" text-anchor="middle">entry / stock local +=</text></g>
       <g class="st bad"><rect x="1100" y="270" width="180" height="90" rx="14"/>
         <text class="n" x="1190" y="298" text-anchor="middle">Rechazado</text>
-        <text class="c" x="1190" y="316" text-anchor="middle">EstadoRechazado</text>
+        <text class="c" x="1190" y="316" text-anchor="middle">Rechazado</text>
         <text class="e" x="1190" y="342" text-anchor="middle">entry / registra merma</text></g>
 
       <!-- transiciones -->
@@ -91,14 +91,14 @@
         <text class="ev" x="545" y="185" text-anchor="middle">despachar()</text>
         <text class="ac" x="545" y="214" text-anchor="middle">/ sale del CD</text></g>
       <g class="tr"><path d="M750 195 H858" marker-end="url(#arrow)"/>
-        <text class="ev" x="805" y="185" text-anchor="middle">recibir()</text>
+        <text class="ev" x="805" y="185" text-anchor="middle" textLength="104" lengthAdjust="spacingAndGlyphs">recibir(integro)</text>
         <text class="ac" x="805" y="214" text-anchor="middle">/ crea Recepcion</text></g>
       <g class="tr"><path d="M935 160 V75 H1098" marker-end="url(#arrow)"/>
         <text class="ev" x="945" y="46">verificar()</text>
         <text class="ac" x="945" y="64">[precintoIntegro]</text></g>
       <g class="tr"><path d="M935 230 V315 H1098" marker-end="url(#arrow)"/>
-        <text class="ev" x="945" y="340">rechazar(motivo)</text>
-        <text class="ac" x="945" y="358">[precinto roto]</text></g>
+        <text class="ev" x="945" y="340" textLength="140" lengthAdjust="spacingAndGlyphs">verificar(motivo)</text>
+        <text class="ac" x="945" y="358">[!precintoIntegro]</text></g>
 
       <!-- finales -->
       <g class="tr"><path d="M1280 75 H1316" marker-end="url(#arrow)"/></g>
@@ -114,21 +114,21 @@
     <tr><td>●</td><td>crear bulto</td><td>productos de la orden, sin superar lo pendiente (RN-08)</td><td>Preparado</td><td>Se crean los <code>DetalleBulto</code>.</td><td>US-06</td></tr>
     <tr><td>Preparado</td><td><code>precintar()</code></td><td>—</td><td>Precintado</td><td>Asigna <code>codigoPrecinto</code>.</td><td>US-06</td></tr>
     <tr><td>Precintado</td><td><code>despachar()</code></td><td>el remito se despacha</td><td>En tránsito</td><td>Sale del CD.</td><td>US-07</td></tr>
-    <tr><td>En tránsito</td><td><code>recibir()</code></td><td>—</td><td>Recibido</td><td>Se crea la <code>Recepcion</code>.</td><td>US-08</td></tr>
+    <tr><td>En tránsito</td><td><code>recibir(integro)</code></td><td>—</td><td>Recibido</td><td>Se crea la <code>Recepcion</code> con la condición del precinto (<code>precintoIntegro</code>). Todavía no habilita venta.</td><td>US-08</td></tr>
     <tr><td>Recibido</td><td><code>verificar()</code></td><td><code>precintoIntegro</code></td><td>Verificado</td><td><strong>Recién acá</strong> el stock del local aumenta (Disponible). RN-01</td><td>US-08</td></tr>
-    <tr><td>Recibido</td><td><code>rechazar(motivo)</code></td><td>precinto roto</td><td>Rechazado</td><td>No impacta stock vendible; cuenta como merma. RN-02</td><td>US-08</td></tr>
+    <tr><td>Recibido</td><td><code>verificar(motivo)</code></td><td><code>!precintoIntegro</code></td><td>Rechazado</td><td>Motivo obligatorio. No impacta el stock del local ni devuelve unidades al CD; registra la merma (producto, cantidad, costo vigente), valorizada en el reporte de rechazos. RN-02</td><td>US-08</td></tr>
   </table></div>
 
   <h2>Acciones válidas por estado</h2>
   <p class="sub">Cada celda "error" es un caso de test: la acción debe lanzar excepción y el estado no cambia.</p>
   <div class="tbl"><table>
-    <tr><th>Estado</th><th><code>precintar</code></th><th><code>despachar</code></th><th><code>recibir</code></th><th><code>verificar</code></th><th><code>rechazar</code></th></tr>
-    <tr><td>Preparado</td><td class="ok">→ Precintado</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
-    <tr><td>Precintado</td><td class="no">error</td><td class="ok">→ En tránsito</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
-    <tr><td>En tránsito</td><td class="no">error</td><td class="no">error</td><td class="ok">→ Recibido</td><td class="no">error</td><td class="no">error</td></tr>
-    <tr><td>Recibido</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="ok">→ Verificado</td><td class="ok">→ Rechazado</td></tr>
-    <tr><td>Verificado</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
-    <tr><td>Rechazado</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
+    <tr><th>Estado</th><th><code>precintar</code></th><th><code>despachar</code></th><th><code>recibir</code></th><th><code>verificar</code></th></tr>
+    <tr><td>Preparado</td><td class="ok">→ Precintado</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
+    <tr><td>Precintado</td><td class="no">error</td><td class="ok">→ En tránsito</td><td class="no">error</td><td class="no">error</td></tr>
+    <tr><td>En tránsito</td><td class="no">error</td><td class="no">error</td><td class="ok">→ Recibido</td><td class="no">error</td></tr>
+    <tr><td>Recibido</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="ok">→ Verificado (íntegro) / Rechazado (roto, con motivo)</td></tr>
+    <tr><td>Verificado</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
+    <tr><td>Rechazado</td><td class="no">error</td><td class="no">error</td><td class="no">error</td><td class="no">error</td></tr>
   </table></div>
 
   <h2>Reglas</h2>
@@ -137,8 +137,9 @@
     <li>Cada transición inserta un <code>CambioEstadoBulto</code> (fecha, anterior, nuevo, responsable, observación). Nunca se edita ni borra (RN-03).</li>
     <li>"Disponible" <strong>no es un estado del bulto</strong>: es el efecto en el stock del local al entrar en Verificado.</li>
     <li>Verificado y Rechazado son finales.</li>
-    <li>El <code>Remito</code> recalcula su estado con <code>actualizarEstadoSegunBultos()</code> después de cada transición de sus bultos.</li>
+    <li>El <code>Remito</code> pasa a En tránsito al despacharse y recalcula su estado con <code>actualizarEstadoSegunBultos()</code> después de cada verificación: En revisión mientras falten bultos; Verificado, Rechazado o Parcialmente aceptado cuando todos terminaron.</li>
   </ul>
 </main>
+<script src="exportar-imagen.js"></script>
 </body>
 </html>

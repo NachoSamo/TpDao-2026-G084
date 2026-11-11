@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-23T22:07:59.874603+00:00",
+  "title": "Design System: Andén",
+  "extensions": {
+    "colorMeta": {
+      "forest": {
+        "role": "primary",
+        "displayName": "Bosque",
+        "tonalRamp": [
+          "oklch(15.00% 0.0545 164.10)",
+          "oklch(26.43% 0.0545 164.10)",
+          "oklch(37.86% 0.0545 164.10)",
+          "oklch(49.29% 0.0545 164.10)",
+          "oklch(60.71% 0.0545 164.10)",
+          "oklch(72.14% 0.0545 164.10)",
+          "oklch(83.57% 0.0545 164.10)",
+          "oklch(95.00% 0.0545 164.10)"
+        ]
+      },
+      "lime": {
+        "role": "secondary",
+        "displayName": "Lima",
+        "tonalRamp": [
+          "oklch(15.00% 0.1037 120.05)",
+          "oklch(26.43% 0.1037 120.05)",
+          "oklch(37.86% 0.1037 120.05)",
+          "oklch(49.29% 0.1037 120.05)",
+          "oklch(60.71% 0.1037 120.05)",
+          "oklch(72.14% 0.1037 120.05)",
+          "oklch(83.57% 0.1037 120.05)",
+          "oklch(95.00% 0.1037 120.05)"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Tiza",
+        "tonalRamp": [
+          "oklch(15.00% 0.0034 145.55)",
+          "oklch(26.43% 0.0034 145.55)",
+          "oklch(37.86% 0.0034 145.55)",
+          "oklch(49.29% 0.0034 145.55)",
+          "oklch(60.71% 0.0034 145.55)",
+          "oklch(72.14% 0.0034 145.55)",
+          "oklch(83.57% 0.0034 145.55)",
+          "oklch(95.00% 0.0034 145.55)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "tonalRamp": [
+          "oklch(15.00% 0.0000 89.88)",
+          "oklch(26.43% 0.0000 89.88)",
+          "oklch(37.86% 0.0000 89.88)",
+          "oklch(49.29% 0.0000 89.88)",
+          "oklch(60.71% 0.0000 89.88)",
+          "oklch(72.14% 0.0000 89.88)",
+          "oklch(83.57% 0.0000 89.88)",
+          "oklch(95.00% 0.0000 89.88)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "tonalRamp": [
+          "oklch(15.00% 0.0325 166.65)",
+          "oklch(26.43% 0.0325 166.65)",
+          "oklch(37.86% 0.0325 166.65)",
+          "oklch(49.29% 0.0325 166.65)",
+          "oklch(60.71% 0.0325 166.65)",
+          "oklch(72.14% 0.0325 166.65)",
+          "oklch(83.57% 0.0325 166.65)",
+          "oklch(95.00% 0.0325 166.65)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Texto secundario",
+        "tonalRamp": [
+          "oklch(15.00% 0.0249 157.98)",
+          "oklch(26.43% 0.0249 157.98)",
+          "oklch(37.86% 0.0249 157.98)",
+          "oklch(49.29% 0.0249 157.98)",
+          "oklch(60.71% 0.0249 157.98)",
+          "oklch(72.14% 0.0249 157.98)",
+          "oklch(83.57% 0.0249 157.98)",
+          "oklch(95.00% 0.0249 157.98)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Separador",
+        "tonalRamp": [
+          "oklch(15.00% 0.0134 152.59)",
+          "oklch(26.43% 0.0134 152.59)",
+          "oklch(37.86% 0.0134 152.59)",
+          "oklch(49.29% 0.0134 152.59)",
+          "oklch(60.71% 0.0134 152.59)",
+          "oklch(72.14% 0.0134 152.59)",
+          "oklch(83.57% 0.0134 152.59)",
+          "oklch(95.00% 0.0134 152.59)"
+        ]
+      },
+      "side": {
+        "role": "neutral",
+        "displayName": "Salvia",
+        "tonalRamp": [
+          "oklch(15.00% 0.0092 150.69)",
+          "oklch(26.43% 0.0092 150.69)",
+          "oklch(37.86% 0.0092 150.69)",
+          "oklch(49.29% 0.0092 150.69)",
+          "oklch(60.71% 0.0092 150.69)",
+          "oklch(72.14% 0.0092 150.69)",
+          "oklch(83.57% 0.0092 150.69)",
+          "oklch(95.00% 0.0092 150.69)"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Peligro",
+        "tonalRamp": [
+          "oklch(15.00% 0.1215 27.63)",
+          "oklch(26.43% 0.1215 27.63)",
+          "oklch(37.86% 0.1215 27.63)",
+          "oklch(49.29% 0.1215 27.63)",
+          "oklch(60.71% 0.1215 27.63)",
+          "oklch(72.14% 0.1215 27.63)",
+          "oklch(83.57% 0.1215 27.63)",
+          "oklch(95.00% 0.1215 27.63)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Título principal",
+        "purpose": "Encabezado de vista; 26 px en móvil."
+      },
+      "title": {
+        "displayName": "Título de sección",
+        "purpose": "Secciones operativas."
+      },
+      "body": {
+        "displayName": "Lectura",
+        "purpose": "Texto base."
+      },
+      "label": {
+        "displayName": "Control",
+        "purpose": "Botones y campos."
+      }
+    },
+    "shadows": [
+      {
+        "name": "dialog",
+        "value": "0 20px 80px #20362d33",
+        "purpose": "Separar el diálogo del plano operativo."
+      },
+      {
+        "name": "toast",
+        "value": "0 6px 24px #20362d24",
+        "purpose": "Notificación superpuesta."
+      }
+    ],
+    "motion": [
+      {
+        "name": "parcel-hover",
+        "value": "border-color .15s, transform .15s",
+        "purpose": "Respuesta al hover de bultos."
+      },
+      {
+        "name": "toast",
+        "value": "opacity .2s, transform .2s",
+        "purpose": "Entrada y salida de la notificación."
+      },
+      {
+        "name": "content-arrive",
+        "value": "arrive .3s ease-out",
+        "purpose": "Entrada del contenido solo sin preferencia de movimiento reducido."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-max",
+        "value": "650px"
+      },
+      {
+        "name": "compact-max",
+        "value": "1050px"
+      },
+      {
+        "name": "wide-min",
+        "value": "1700px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primary",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción primary de la interfaz.",
+      "html": "<button class=\"ds-button-primary\">Crear bulto</button>",
+      "css": ".ds-button-primary{font-family:Rubik,sans-serif;font-size:12px;border:1px solid var(--line,#dce5de);padding:10px 15px;border-radius:7px;min-height:40px;cursor:pointer;background:var(--forest,#244c3b);border-color:var(--forest,#244c3b);color:white;}.ds-button-primary:hover{background:#153e2c;}.ds-button-primary:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}"
+    },
+    {
+      "name": "Botón neutral",
+      "kind": "button",
+      "refersTo": "button-neutral",
+      "description": "Acción neutral de la interfaz.",
+      "html": "<button class=\"ds-button-neutral\">Cancelar</button>",
+      "css": ".ds-button-neutral{font-family:Rubik,sans-serif;font-size:12px;border:1px solid var(--line,#dce5de);padding:10px 15px;border-radius:7px;min-height:40px;cursor:pointer;background:var(--paper,#fff);color:var(--ink,#20362d);}.ds-button-neutral:hover{background:#edf3ec;}.ds-button-neutral:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}"
+    },
+    {
+      "name": "Botón lime",
+      "kind": "button",
+      "refersTo": "button-lime",
+      "description": "Acción lime de la interfaz.",
+      "html": "<button class=\"ds-button-lime\">Continuar</button>",
+      "css": ".ds-button-lime{font-family:Rubik,sans-serif;font-size:12px;border:1px solid var(--line,#dce5de);padding:10px 15px;border-radius:7px;min-height:40px;cursor:pointer;background:var(--lime,#d9ed9e);border-color:var(--lime,#d9ed9e);color:var(--forest,#244c3b);}.ds-button-lime:hover{background:#edf3ec;}.ds-button-lime:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}"
+    },
+    {
+      "name": "Botón danger",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Acción danger de la interfaz.",
+      "html": "<button class=\"ds-button-danger\">Dar de baja</button>",
+      "css": ".ds-button-danger{font-family:Rubik,sans-serif;font-size:12px;border:1px solid var(--line,#dce5de);padding:10px 15px;border-radius:7px;min-height:40px;cursor:pointer;background:var(--paper,#fff);color:var(--danger,#973e36);}.ds-button-danger:hover{background:#edf3ec;}.ds-button-danger:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}"
+    },
+    {
+      "name": "Campo",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Selector o entrada con label visible.",
+      "html": "<label class=\"ds-field\">Sucursal<input placeholder=\"Nombre de sucursal\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:7px;font-family:Rubik,sans-serif;font-size:12px;color:var(--ink,#20362d)}.ds-field input{font:inherit;border:1px solid #cdd9ce;border-radius:6px;padding:10px 11px;min-height:42px;background:var(--paper,#fff);color:var(--ink,#20362d)}.ds-field input:focus{border-color:#66866a}.ds-field input:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}"
+    },
+    {
+      "name": "Navegación activa",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Sección seleccionada con nombre visible.",
+      "html": "<nav><a class=\"ds-nav\" href=\"#tablero\" aria-current=\"page\">Bultos</a></nav>",
+      "css": ".ds-nav{display:flex;padding:11px 13px;border-radius:8px;background:var(--forest,#244c3b);color:var(--paper,#fff);text-decoration:none;font-family:Rubik,sans-serif;font-size:12px;}.ds-nav:hover{background:var(--forest,#244c3b)}.ds-nav:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Estado textual compacto.",
+      "html": "<span class=\"ds-badge\">Verificado</span>",
+      "css": ".ds-badge{display:inline-flex;gap:6px;border-radius:4px;font:10px Rubik,sans-serif;padding:4px 7px;background:#e4f1e1;color:#346438}"
+    },
+    {
+      "name": "Tarjeta de bulto",
+      "kind": "card",
+      "refersTo": "parcel",
+      "description": "Detalle y transición separados.",
+      "html": "<article class=\"ds-parcel\"><button class=\"ds-detail\">Bulto #12</button><strong class=\"ds-route\">Centro → Local Norte</strong><p class=\"ds-origin\">Preparado · 3 productos</p><button class=\"ds-next\">Precintar</button></article>",
+      "css": ".ds-parcel{background:var(--paper,#fff);color:var(--ink,#20362d);border:1px solid #dde5de;border-radius:9px;padding:13px 12px;width:195px;font:12px/1.55 Rubik,sans-serif;transition:border-color .15s,transform .15s}.ds-parcel:hover{border-color:#7b9b80;transform:translateY(-2px)}.ds-detail{display:flex;width:100%;padding:0;margin:0 0 11px;border:0;background:transparent;color:inherit;font:700 12px Rubik,sans-serif;text-align:left;min-height:24px;cursor:pointer}.ds-detail:hover{color:var(--forest,#244c3b);text-decoration:underline;text-underline-offset:3px}.ds-route{display:block}.ds-origin{font-size:10px;color:var(--muted,#5b6b61);margin:4px 0 13px}.ds-next{width:100%;min-height:40px;border:0;border-radius:7px;background:#f1f5ed;color:var(--forest,#244c3b);font:10px Rubik,sans-serif;padding:7px 8px;cursor:pointer}.ds-next:hover{background:#dfeccf}.ds-detail:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}.ds-next:focus-visible{outline:3px solid #6f8c36;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-parcel{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Señalética de distribución",
+    "overview": "Andén toma la señalética de distribución como mundo visual: superficies claras, verde bosque, tipografía Rubik local y trazos precisos. La jerarquía se construye con espaciado y peso; no usa imágenes decorativas ni indicadores inventados.\n\nLa interfaz es compacta y operativa. Los estados tienen nombre además de color, las acciones explicitan su destino y los datos de demostración permanecen identificados, incluso en móvil. La elección confirmada del usuario es un tablero de bultos y estados construido directamente en código; esa primera pantalla no obliga a convertir otras vistas en tableros.",
+    "keyCharacteristics": [
+      "Superficies de tiza y salvia con acciones en bosque.",
+      "Rubik regular y bold, números tabulares en tablas.",
+      "Detalle y transición como controles independientes."
+    ],
+    "rules": [
+      {
+        "name": "Estado legible",
+        "body": "Cada estado lleva un nombre visible; el color acompaña y no reemplaza esa información.",
+        "section": "colors"
+      },
+      {
+        "name": "Jerarquía por peso",
+        "body": "Usar Rubik regular para lectura y bold para títulos e identificadores; sostener la jerarquía con espacio antes de agregar decoración.",
+        "section": "typography"
+      },
+      {
+        "name": "Plano operativo",
+        "body": "Las superficies de trabajo se separan por tono y bordes; las sombras quedan para el diálogo y la notificación superpuesta.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do mantener labels visibles, foco visible y enlace de salto.",
+      "Do mostrar carga, éxito y error cerca de la operación, con errores dentro del formulario.",
+      "Do conservar nombres de estados, acciones explícitas y señal de demo visible.",
+      "Do respetar reduced-motion y el scroll propio de tablero y tablas."
+    ],
+    "donts": [
+      "Don't agregar imágenes decorativas ni métricas inventadas.",
+      "Don't unir apertura del detalle y transición en un único control.",
+      "Don't ofrecer drag-and-drop que omita las reglas de State."
+    ]
+  }
+}

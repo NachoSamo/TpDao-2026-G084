@@ -1,0 +1,65 @@
+sequenceDiagram
+    actor Encargado
+    participant UI as Pantalla de recepcion
+    participant Servicio as ServicioLogistica
+    participant Bulto as bulto - BultoContenedor
+    participant Estado as estadoActual - EstadoBulto
+    participant Remito as remito - Remito
+    participant Stock as stockLocal - Stock
+    participant DAO as DAOLogisticaInventario
+
+    Note over Servicio,DAO: Cada operacion se guarda en una transaccion atomica
+    Encargado->>UI: Registrar llegada del bulto
+    UI->>Servicio: recibir_bulto(id, precinto_integro)
+    Servicio->>DAO: cargar_bulto_y_remito(id)
+    DAO-->>Servicio: bulto y remito
+    Servicio->>Bulto: recibir()
+    Bulto->>Estado: recibir(bulto)
+
+    alt El estado permite recibir
+        Estado->>Bulto: cambiar_estado(EstadoRecibido)
+        Bulto->>Bulto: registrar CambioEstadoBulto
+        Bulto-->>Servicio: transicion realizada
+        Servicio->>DAO: guardar recepcion, bulto e historial
+        DAO-->>Servicio: operacion confirmada
+        Servicio-->>UI: Recepcion registrada sin ingresar stock
+    else Transicion no permitida
+        Estado-->>Bulto: error de estado
+        Bulto-->>Servicio: error de estado
+        Servicio-->>UI: Informar error sin guardar cambios
+    end
+
+    Note over Encargado,DAO: La revision posterior es una operacion independiente
+    Encargado->>UI: Confirmar revision del precinto
+    UI->>Servicio: verificar_bulto(id)
+    Servicio->>DAO: cargar_bulto_recepcion_y_remito(id)
+    DAO-->>Servicio: objetos actualizados
+
+    alt El bulto esta Recibido
+        alt El precinto esta integro
+            Servicio->>Bulto: verificar()
+            Bulto->>Estado: verificar(bulto)
+            Estado->>Bulto: cambiar_estado(EstadoVerificado)
+        else El precinto esta roto
+            Servicio->>Bulto: rechazar(motivo)
+            Bulto->>Estado: rechazar(bulto, motivo)
+            Estado->>Bulto: cambiar_estado(EstadoRechazado)
+        end
+        Bulto->>Bulto: registrar CambioEstadoBulto
+        Bulto-->>Servicio: transicion realizada
+        Servicio->>Remito: actualizarEstadoSegunBultos()
+        Remito-->>Servicio: estado actualizado
+        opt Bulto verificado
+            loop Productos del bulto verificado
+                Servicio->>Stock: ingresarVerificado(cantidad)
+                Stock->>Stock: registrar MovimientoStock
+            end
+        end
+        Servicio->>DAO: guardar estados, historial y movimientos juntos
+        DAO-->>Servicio: operacion confirmada
+        Servicio-->>UI: Mostrar resultado de la revision
+    else El bulto no esta Recibido
+        Servicio-->>UI: Informar error sin guardar cambios
+    end
+    Note over Servicio,DAO: Si falla el guardado se revierte toda la operacion
+    Note over Bulto,Stock: Un bulto rechazado nunca ingresa stock vendible

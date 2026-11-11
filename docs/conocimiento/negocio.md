@@ -47,7 +47,7 @@ Opcionales (solo si sobra tiempo): órdenes de compra sugeridas, promociones/lis
 
 | ID | Regla |
 |---|---|
-| RN-01 | El stock del local no aumenta hasta que el bulto (y su remito) estén **Verificados**. |
+| RN-01 | Cada bulto verificado habilita su contenido; remito mixto queda parcialmente aceptado. Interpretación de la condición literal bulto/remito verificados, pendiente de cátedra: ver [implementación](../implementacion.md). |
 | RN-02 | Si el precinto llega roto, el bulto pasa a **Rechazado** y no habilita venta. |
 | RN-03 | El historial de estados del bulto es **inmutable** (solo inserciones). |
 | RN-04 | No se puede vender más que el stock **disponible y verificado** del local. |
@@ -81,7 +81,7 @@ Otros sugeridos: existencias actuales y productos en stock mínimo, valorizació
 ## 7. Decisiones pendientes
 
 - [x] Lenguaje y base de datos: Python + SQLite → [stack.md](../stack.md).
-- [ ] Valores de los enums: `TipoSucursal`, `EstadoOrden`, `EstadoRemito`, `TipoMovimiento`, `TipoMedioPago`.
-- [ ] ¿El despacho descuenta stock del CD? (propuesta: sí, movimiento de egreso al despachar).
-- [ ] Reglas concretas de devolución (plazo máximo, estado del producto).
-- [ ] ¿Qué pasa con la mercadería de un bulto rechazado? (propuesta: queda como merma, sin reingreso).
+- [x] Valores de los enums implementados en el esquema y servicios; ver [implementación](../implementacion.md). Propuesta inicial: `TipoSucursal`, `EstadoOrden`, `EstadoRemito`, `TipoMovimiento`, `TipoMedioPago`.
+- [x] Preparar reserva; despachar descuenta y libera reserva.
+- [x] Solo apta, venta registrada y cantidades acumuladas limitadas. Sin plazo máximo impuesto.
+- [x] Rechazado no habilita venta; no es automáticamente merma ni retorno.

@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Servicio as Sistema
+    participant Stock as stock - Stock
+    participant Observer as GeneradorReposicionAutomatica
+    participant DAO as DAO
+    participant DB as SQLite
+    Servicio->>DB: BEGIN IMMEDIATE
+    Servicio->>DAO: registrar venta y egreso
+    Servicio->>Stock: notificar()
+    opt disponible menor que minimo
+        Stock->>Observer: actualizar(stock)
+        Observer->>Servicio: consolidar_faltante(stock)
+        Servicio->>DAO: insertar aviso y consultar pedidos pendientes
+        DAO-->>Servicio: cantidades ya solicitadas
+        opt falta pedir unidades adicionales
+            Servicio->>DAO: crear o ampliar orden pendiente
+        end
+    end
+    Servicio->>DAO: registrar cobros
+    alt todas las escrituras correctas
+        Servicio->>DB: COMMIT
+    else falla alguna escritura
+        Servicio->>DB: ROLLBACK de venta, stock, aviso y orden
+    end

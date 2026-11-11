@@ -1,0 +1,9 @@
+stateDiagram-v2
+    [*] --> PREPARADO
+    PREPARADO --> PRECINTADO: precintar
+    PRECINTADO --> EN_TRANSITO: despachar remito
+    EN_TRANSITO --> RECIBIDO: registrar llegada
+    RECIBIDO --> VERIFICADO: verificar con precinto integro
+    RECIBIDO --> RECHAZADO: verificar con precinto roto y motivo
+    VERIFICADO --> [*]
+    RECHAZADO --> [*]

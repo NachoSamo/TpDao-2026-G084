@@ -1,0 +1,20 @@
+"""Carga explícita reproducible sobre una base vacía."""
+def cargar(s):
+    if s.listar('sucursal'):
+        raise ValueError('La demo requiere una base vacía; elegí otro archivo con --db')
+    cd=s.guardar('sucursal',dict(nombre='CD Córdoba',direccion='Ruta 19 km 8',tipo='CD'))
+    local=s.guardar('sucursal',dict(nombre='Centro',direccion='Colón 100',tipo='LOCAL'))
+    cat=s.guardar('categoria',dict(nombre='Almacén'))
+    prov=s.guardar('proveedor',dict(nombre='Mayorista Demo',cuit='30712345678'))
+    p=s.guardar('producto',dict(codigo='YER-01',nombre='Yerba 1 kg',categoria_id=cat,precio='2500.50',costo='1600.25'))
+    s.asociar_proveedor(p,prov,'1600.25',True)
+    s.ingresar_proveedor(cd,p,prov,100,'1600.25')
+    o=s.crear_orden(cd,local,{p:20});r=s.crear_remito(o)
+    b=s.preparar_bulto(r,{p:15},'Demo');b2=s.preparar_bulto(r,{p:5},'Demo')
+    s.precintar(b,'DEMO-001','Demo');s.precintar(b2,'DEMO-002','Demo');s.despachar(r,'Demo')
+    s.recibir(b,True,'Demo');s.verificar(b,'Demo')
+    s.recibir(b2,False,'Demo');s.verificar(b2,'Demo','Precinto roto')
+    v=s.vender(local,{p:3},{'EFECTIVO':'5001.00','DEBITO':'2500.50'})
+    s.devolver(v,p,1,True,'EFECTIVO')
+    s.definir_minimo(local,p,15)
+    return dict(cd=cd,local=local,producto=p,venta=v,remito=r)

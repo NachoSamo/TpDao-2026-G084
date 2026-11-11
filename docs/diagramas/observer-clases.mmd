@@ -1,0 +1,24 @@
+classDiagram
+    class Stock {
+        +int sucursal_id
+        +int producto_id
+        +int disponible
+        +int minimo
+        +list observadores
+        +notificar()
+    }
+    class ObservadorStock {
+        <<interface>>
+        +actualizar(stock)
+    }
+    class GeneradorReposicionAutomatica {
+        +actualizar(stock)
+    }
+    class Sistema {
+        +list observadores
+        +consolidar_faltante(stock)
+    }
+    Stock --> ObservadorStock : notifica a cada uno
+    ObservadorStock <|.. GeneradorReposicionAutomatica
+    GeneradorReposicionAutomatica --> Sistema : solicita consolidar
+    Sistema --> Stock : construye y dispara control
